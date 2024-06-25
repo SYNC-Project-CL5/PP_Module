@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>MZEA_PP220O01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: MZEA_PP220O01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  PBO</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          SAPMZEA_03O01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module STATUS_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE STATUS_0100 OUTPUT.
+  SET PF-STATUS '0100'.
+  SET TITLEBAR '0100'.
+
+  " SY-UNAME 현재 사용자
+  " SY-DATUM 현재 날짜
+  " SY-UZEIT 현재 시간
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module CLEAR_OK_CODE OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE CLEAR_OK_CODE OUTPUT.
+  CLEAR OK_CODE.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module INIT_ALV_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE INIT_ALV_0100 OUTPUT.
+
+  IF GO_CONTAINER IS INITIAL.
+<font color ="#0000FF">*    PERFORM SELECT_DATA_PPT020.</font>
+    PERFORM SELECT_DATA_AUFK.
+    PERFORM MAKE_DISPLAY_DATA.
+    PERFORM MAKE_DISPLAY_DATA2.
+
+    PERFORM CREATE_OBJECT_0100.
+    PERFORM SET_ALV_LAYOUT_0100.
+    PERFORM SET_ALV_EVENT_0100.
+    PERFORM SET_ALV_FIELDCAT_0100.
+    PERFORM DISPLAY_ALV_0100.
+  ELSE.
+    PERFORM REFRESH_ALV_0100 USING GO_ALV_GRID.
+  ENDIF.
+
+  IF GO_CONTAINER2 IS INITIAL.
+<font color ="#0000FF">*    PERFORM SELECT_DATA_AFRU.</font>
+    PERFORM MAKE_DISPLAY_DATA3.
+    PERFORM CREATE_OBJECT_0110.
+    PERFORM SET_ALV_FIELDCAT_0110.
+    PERFORM SET_ALV_LAYOUT_0100.
+<font color ="#0000FF">*    PERFORM SET_ALV_EVENT_0100_2.</font>
+    PERFORM DISPLAY_ALV_0110.
+  ELSE.
+    PERFORM REFRESH_ALV_0110 USING GO_ALV_GRID_2.
+  ENDIF.
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module INIT_LISTBOX OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE INIT_LISTBOX OUTPUT.
+
+<font color ="#0000FF">* 미사용</font>
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module FILL_DYNNR_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE FILL_DYNNR_0100 OUTPUT.
+
+  PERFORM INIT_VAL.
+
+  CASE TABSTRIP-ACTIVETAB.
+    WHEN 'TAB1'.
+      GV_PRESSEDTAB = 'TAB1'.
+      GV_SUBSCREEN = '0110'.
+
+
+    WHEN 'TAB2'.
+      GV_PRESSEDTAB = 'TAB2'.
+      GV_SUBSCREEN = '0120'.
+
+      PERFORM CAL_FNPD_1_6.
+
+    WHEN 'TAB3'.
+      GV_PRESSEDTAB = 'TAB3'.
+      GV_SUBSCREEN = '0130'.
+
+      PERFORM CAL_FNPD_7_12.
+
+    WHEN 'TAB4'.
+      GV_PRESSEDTAB = 'TAB4'.
+      GV_SUBSCREEN = '0140'.
+
+      PERFORM CAL_FNPD_13_18.
+
+    WHEN 'TAB5'.
+      GV_PRESSEDTAB = 'TAB5'.
+      GV_SUBSCREEN = '0150'.
+
+      PERFORM CAL_FNPD_19_24.
+
+    WHEN OTHERS.
+      TABSTRIP-ACTIVETAB = 'TAB1'.
+      GV_SUBSCREEN = '0110'.
+  ENDCASE.
+
+<font color ="#0000FF">***  *  " 각 탭스트립에서 불량품 수를 가져옴</font>
+<font color ="#0000FF">***  CASE TABSTRIP-ACTIVETAB.</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">***    WHEN 'TAB2'.</font>
+<font color ="#0000FF">***      GS_DATA3-FNPD = GV_FNPD1.</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">***    WHEN 'TAB3'.</font>
+<font color ="#0000FF">***      GS_DATA3-FNPD = GV_FNPD2.</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">***    WHEN 'TAB4'.</font>
+<font color ="#0000FF">***      GS_DATA3-FNPD = GV_FNPD3.</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">***    WHEN 'TAB5'.</font>
+<font color ="#0000FF">***      GS_DATA3-FNPD = GV_FNPD4.</font>
+<font color ="#0000FF">***  ENDCASE.</font>
+
+<font color ="#0000FF">*  PERFORM MAKE_DISPLAY_DATA_3.</font>
+
+  IF ZEA_MMT010-MATNR IS INITIAL.
+    CLEAR ZEA_MMT020-MAKTX.
+  ENDIF.
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module MODIFY_SCREEN_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE MODIFY_SCREEN_0100 OUTPUT.
+
+  GO_CONTAINER3-&gt;SET_VISIBLE( GV_SHOW_APPROVAL ).
+<font color ="#0000FF">*  GO_EDITOR-&gt;SET_VISIBLE( GV_SHOW_APPROVAL ).</font>
+
+  CHECK GV_SHOW_APPROVAL IS INITIAL.
+
+  LOOP AT SCREEN.
+    IF SCREEN-GROUP1 = 'MOD'.
+      SCREEN-ACTIVE = 0.
+      MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
+
+ENDMODULE.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

@@ -1,0 +1,875 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZEA_PP110F01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZEA_PP110F01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include YE00_EX007F01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          YE00_EX007F01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form CREATE_OBJECT_0100</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM CREATE_OBJECT_0100 .
+
+  CREATE OBJECT GO_CON_TOP
+    EXPORTING
+      CONTAINER_NAME = GC_CUSTOM_CONTAINER_NAME_TOP " Name of the Screen CustCtrl Name to Link Container To
+    EXCEPTIONS
+      OTHERS         = 1.
+
+  IF SY-SUBRC &lt;&gt; 0.
+    MESSAGE E020. " Container 생성 중 오류가 발생했습니다.
+  ENDIF.
+
+  CREATE OBJECT GO_SPLIT_TOP
+    EXPORTING
+      PARENT  = GO_CON_TOP " Parent Container
+      ROWS    = 1          " Number of Rows to be displayed
+      COLUMNS = 2          " Number of Columns to be Displayed
+    EXCEPTIONS
+      OTHERS  = 1.
+
+  IF SY-SUBRC &lt;&gt; 0.
+    MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+      WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+  ENDIF.
+
+  GO_SPLIT_TOP-&gt;SET_COLUMN_WIDTH(
+    EXPORTING
+      ID                = 1                 " Column ID
+      WIDTH             = 17                " NPlWidth
+  ).
+
+  GO_CON_TOP_TREE = GO_SPLIT_TOP-&gt;GET_CONTAINER( ROW = 1 COLUMN = 1 ).
+  GO_CON_TOP_GRID = GO_SPLIT_TOP-&gt;GET_CONTAINER( ROW = 1 COLUMN = 2 ).
+
+
+  PERFORM CREATE_OBJECT_TREE.
+  PERFORM CREATE_OBJECT_ALV.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form CREATE_OBJECT_TREE</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM CREATE_OBJECT_TREE .
+
+  CREATE OBJECT GO_SIMPLE_TREE
+    EXPORTING
+      PARENT              = GO_CON_TOP_TREE " Parent Container
+      NODE_SELECTION_MODE = CL_GUI_SIMPLE_TREE=&gt;NODE_SEL_MODE_SINGLE
+    EXCEPTIONS
+      OTHERS              = 1.
+
+  IF SY-SUBRC &lt;&gt; 0.
+    MESSAGE E021. " TREE 객체 생성 중 오류가 발생했습니다.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form CREATE_OBJECT_ALV</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM CREATE_OBJECT_ALV .
+
+  CREATE OBJECT GO_ALV_GRID_TOP
+    EXPORTING
+      I_PARENT = GO_CON_TOP_GRID " Parent Container
+    EXCEPTIONS
+      OTHERS   = 1.
+
+  IF SY-SUBRC &lt;&gt; 0.
+    MESSAGE E021. " ALV 객체 생성 중 오류가 발생했습니다.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SELECT_DATA</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM SELECT_DATA .
+
+<font color ="#0000FF">*-- 판매계획</font>
+  REFRESH GT_HEADER.
+
+  SELECT FROM ZEA_SDT030 AS A
+<font color ="#0000FF">*         JOIN ZEA_SDT020 AS B</font>
+<font color ="#0000FF">*           ON B~SAPNR EQ A~SAPNR</font>
+<font color ="#0000FF">*          AND B~SP_YEAR EQ A~SP_YEAR</font>
+         JOIN ZEA_T001W AS C
+           ON C~WERKS EQ A~WERKS
+<font color ="#0000FF">*          AND C~WERKS EQ B~WERKS</font>
+         JOIN ZEA_MMT020 AS D
+           ON D~MATNR EQ A~MATNR
+          AND SPRAS EQ @SY-LANGU
+  FIELDS A~SP_YEAR, C~BUKRS, C~WERKS, C~PNAME1, D~MATNR, D~MAKTX
+    INTO CORRESPONDING FIELDS OF TABLE @GT_HEADER.
+
+<font color ="#0000FF">*-- 생산계획</font>
+  REFRESH GT_HEADER2.
+
+  SELECT FROM ZEA_PLAF AS A
+         JOIN ZEA_PPT010 AS B ON B~PLANID EQ A~PLANID
+         JOIN ZEA_T001W  AS C ON C~WERKS EQ A~WERKS
+         JOIN ZEA_MMT020 AS D ON D~MATNR EQ B~MATNR
+                        AND D~SPRAS EQ @SY-LANGU
+       FIELDS  A~PDPDAT,
+               C~BUKRS,
+               A~WERKS,
+               C~PNAME1,
+               B~MATNR,
+               D~MAKTX
+    WHERE B~WERKS EQ '10000'
+      AND B~LOEKZ NE 'X'
+       INTO TABLE @GT_HEADER2.
+
+<font color ="#0000FF">*  SELECT FROM ZEA_PLAF AS A</font>
+<font color ="#0000FF">*         LEFT JOIN ZEA_T001W  AS B ON  B~WERKS  EQ A~WERKS</font>
+<font color ="#0000FF">*         LEFT JOIN ZEA_PPT010 AS C ON  C~PLANID EQ A~PLANID</font>
+<font color ="#0000FF">*         JOIN ZEA_MMT020 AS D ON  D~MATNR  EQ C~MATNR</font>
+<font color ="#0000FF">*                              AND D~SPRAS  EQ @SY-LANGU</font>
+<font color ="#0000FF">*    FIELDS  A~PDPDAT,</font>
+<font color ="#0000FF">*            B~BUKRS,</font>
+<font color ="#0000FF">*            B~WERKS,</font>
+<font color ="#0000FF">*            B~PNAME1,</font>
+<font color ="#0000FF">*            C~MATNR,</font>
+<font color ="#0000FF">*            D~MAKTX</font>
+<font color ="#0000FF">*    WHERE B~WERKS EQ '10000'</font>
+<font color ="#0000FF">*      AND B~LOEKZ NE 'X'</font>
+<font color ="#0000FF">*       INTO TABLE @GT_HEADER2.</font>
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form EXPAND_ROOT_NODE_0100</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM EXPAND_ROOT_NODE_0100 .
+
+  GO_SIMPLE_TREE-&gt;EXPAND_ROOT_NODES(
+<font color ="#0000FF">*    EXPORTING</font>
+<font color ="#0000FF">*      LEVEL_COUNT         =                  " Number of Levels to be Expanded</font>
+<font color ="#0000FF">*      EXPAND_SUBTREE      =                  " 'X': Expand all Subsequent Nodes</font>
+<font color ="#0000FF">*    EXCEPTIONS</font>
+<font color ="#0000FF">*      FAILED              = 1                " General Error</font>
+<font color ="#0000FF">*      ILLEGAL_LEVEL_COUNT = 2                " LEVEL_COUNT Must Be GE 0</font>
+<font color ="#0000FF">*      CNTL_SYSTEM_ERROR   = 3                " "</font>
+<font color ="#0000FF">*      OTHERS              = 4</font>
+  ).
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SET_TREE_EVENT_0100</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM SET_TREE_EVENT_0100 .
+
+  DATA LT_EVENT TYPE CNTL_SIMPLE_EVENTS.
+  DATA LS_EVENT LIKE LINE OF LT_EVENT.
+
+  CLEAR LS_EVENT.
+  LS_EVENT-APPL_EVENT = ABAP_ON.
+  LS_EVENT-EVENTID    = CL_GUI_SIMPLE_TREE=&gt;EVENTID_NODE_DOUBLE_CLICK.
+  APPEND LS_EVENT TO LT_EVENT.
+
+  CALL METHOD GO_SIMPLE_TREE-&gt;SET_REGISTERED_EVENTS
+    EXPORTING
+      EVENTS = LT_EVENT " Event Table
+<font color ="#0000FF">*    EXCEPTIONS</font>
+<font color ="#0000FF">*     CNTL_ERROR                = 1                " cntl_error</font>
+<font color ="#0000FF">*     CNTL_SYSTEM_ERROR         = 2                " cntl_system_error</font>
+<font color ="#0000FF">*     ILLEGAL_EVENT_COMBINATION = 3                " ILLEGAL_EVENT_COMBINATION</font>
+<font color ="#0000FF">*     OTHERS = 4</font>
+    .
+  IF SY-SUBRC &lt;&gt; 0.
+<font color ="#0000FF">*   MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO</font>
+<font color ="#0000FF">*     WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.</font>
+  ENDIF.
+
+  SET HANDLER LCL_EVENT_HANDLER=&gt;ON_NODE_DOUBLE_CLICK FOR GO_SIMPLE_TREE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form HANDLE_NODE_DOUBLE_CLICK</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM HANDLE_NODE_DOUBLE_CLICK  USING PV_NODE_KEY TYPE MTREESNODE-NODE_KEY
+                                     PV_SENDER   TYPE REF TO CL_GUI_SIMPLE_TREE.
+
+  IF GO_ALV_GRID_TOP IS INITIAL.
+    " 출력할 ALV가 없습니다.
+    MESSAGE S000 DISPLAY LIKE 'E' WITH TEXT-E01.
+    EXIT.
+  ENDIF.
+
+  READ TABLE GT_NODE_INFO INTO GS_NODE_INFO
+                          WITH KEY NODE_KEY = PV_NODE_KEY
+                                   BINARY SEARCH.
+
+  CHECK SY-SUBRC EQ 0.
+
+  RANGES: R_SP_YEAR FOR GS_NODE_INFO-SP_YEAR,
+          R_BUKRS FOR GS_NODE_INFO-BUKRS,
+          R_WERKS FOR GS_NODE_INFO-WERKS,
+          R_MATNR FOR GS_NODE_INFO-MATNR.
+
+  IF GS_NODE_INFO-SP_YEAR IS NOT INITIAL.
+    R_SP_YEAR-SIGN = 'I'.
+    R_SP_YEAR-OPTION = 'EQ'.
+    R_SP_YEAR-LOW = GS_NODE_INFO-SP_YEAR.
+    APPEND R_SP_YEAR.
+  ENDIF.
+
+  IF GS_NODE_INFO-BUKRS IS NOT INITIAL.
+    R_BUKRS-SIGN = 'I'.
+    R_BUKRS-OPTION = 'EQ'.
+    R_BUKRS-LOW = GS_NODE_INFO-BUKRS.
+    APPEND R_BUKRS.
+  ENDIF.
+
+  IF GS_NODE_INFO-WERKS IS NOT INITIAL.
+    R_WERKS-SIGN = 'I'.
+    R_WERKS-OPTION = 'EQ'.
+    R_WERKS-LOW = GS_NODE_INFO-WERKS.
+    APPEND R_WERKS.
+  ENDIF.
+
+  IF GS_NODE_INFO-MATNR IS NOT INITIAL.
+    R_MATNR-SIGN = 'I'.
+    R_MATNR-OPTION = 'EQ'.
+    R_MATNR-LOW = GS_NODE_INFO-MATNR.
+    APPEND R_MATNR.
+  ENDIF.
+
+
+  SELECT FROM ZEA_T001W   AS A
+<font color ="#0000FF">*         LEFT OUTER JOIN ZEA_SDT030  AS B    ON B~WERKS EQ A~WERKS</font>
+         JOIN ZEA_SDT030  AS B    ON B~WERKS EQ A~WERKS
+                    JOIN ZEA_MMT020  AS C    ON C~MATNR EQ B~MATNR
+       FIELDS *
+        WHERE B~SP_YEAR   IN @R_SP_YEAR
+          AND A~BUKRS     IN @R_BUKRS
+          AND A~WERKS     IN @R_WERKS
+          AND C~MATNR     IN @R_MATNR
+         INTO CORRESPONDING FIELDS OF TABLE @GT_DISPLAY.
+
+
+<font color ="#0000FF">*  SELECT FROM ZEA_SDT030  AS A</font>
+<font color ="#0000FF">**           JOIN ZEA_SDT020  AS B    ON B~SAPNR EQ A~SAPNR</font>
+<font color ="#0000FF">**                                   AND B~SP_YEAR EQ A~SP_YEAR</font>
+<font color ="#0000FF">*         JOIN ZEA_T001W   AS C    ON C~WERKS EQ A~WERKS</font>
+<font color ="#0000FF">**                                   AND C~WERKS EQ B~WERKS</font>
+<font color ="#0000FF">*         JOIN ZEA_MMT020  AS D    ON D~MATNR EQ A~MATNR</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*       FIELDS *</font>
+<font color ="#0000FF">*        WHERE A~SP_YEAR   IN @R_SP_YEAR</font>
+<font color ="#0000FF">*          AND C~BUKRS     IN @R_BUKRS</font>
+<font color ="#0000FF">*          AND C~WERKS     IN @R_WERKS</font>
+<font color ="#0000FF">*          AND D~MATNR     IN @R_MATNR</font>
+<font color ="#0000FF">*         INTO CORRESPONDING FIELDS OF TABLE @GT_DISPLAY.</font>
+
+
+  SORT GT_DISPLAY BY MATNR.
+
+<font color ="#0000FF">*  LOOP AT GT_DISPLAY INTO GS_DISPLAY.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    GS_DISPLAY-SEATSMAX_T = GS_DISPLAY-SEATSMAX + GS_DISPLAY-SEATSMAX_B + GS_DISPLAY-SEATSMAX_F.</font>
+<font color ="#0000FF">*    GS_DISPLAY-SEATSOCC_T = GS_DISPLAY-SEATSOCC + GS_DISPLAY-SEATSOCC_B + GS_DISPLAY-SEATSOCC_F.</font>
+<font color ="#0000FF">*    GS_DISPLAY-SEATSFRE_T = GS_DISPLAY-SEATSMAX_T - GS_DISPLAY-SEATSOCC_T.</font>
+<font color ="#0000FF">*    MODIFY GT_DISPLAY FROM GS_DISPLAY.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  ENDLOOP.</font>
+
+  GO_ALV_GRID_TOP-&gt;REFRESH_TABLE_DISPLAY(
+    EXCEPTIONS
+      FINISHED       = 1                " Display was Ended (by Export)
+      OTHERS         = 2
+  ).
+  IF SY-SUBRC &lt;&gt; 0.
+    MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+      WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SET_ALV_LAYOUT_0100</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM SET_ALV_LAYOUT_0100 .
+
+  CLEAR GS_LAYOUT.
+
+  GS_LAYOUT-ZEBRA = ABAP_ON.
+  GS_LAYOUT-CWIDTH_OPT = 'A'. " Always
+  GS_LAYOUT-SEL_MODE = 'D'.
+  GS_LAYOUT-GRID_TITLE = TEXT-T01.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SET_ALV_FIELDCAT_0100</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM SET_ALV_FIELDCAT_0100 .
+
+  PERFORM GET_FIELDCAT_0100 USING  GT_DISPLAY
+                                   GT_FIELDCAT.
+
+  PERFORM SET_FIELDCAT_0100.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SET_ALV_EVENT_0100</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM SET_ALV_EVENT_0100 .
+
+  SET HANDLER LCL_EVENT_HANDLER=&gt;ON_TOOLBAR FOR GO_ALV_GRID_TOP.
+  SET HANDLER LCL_EVENT_HANDLER=&gt;ON_USER_COMMAND FOR GO_ALV_GRID_TOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form DISPLAY_ALV_0100</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM DISPLAY_ALV_0100 .
+
+  GS_VARIANT-REPORT = SY-REPID.
+  GS_VARIANT-HANDLE = 'H'.
+  GV_SAVE = 'A'.
+  GS_VARIANT-HANDLE = '0001'. " 프로그램 내 ALV 구별자
+
+  GO_ALV_GRID_TOP-&gt;SET_TABLE_FOR_FIRST_DISPLAY(
+    EXPORTING
+      IS_VARIANT                    = GS_VARIANT  " Layout
+      I_SAVE                        = GV_SAVE     " Save Layout
+      IS_LAYOUT                     = GS_LAYOUT   " Layout
+    CHANGING
+      IT_OUTTAB                     = GT_DISPLAY  " Output Table
+      IT_FIELDCATALOG               = GT_FIELDCAT " Field Catalog
+    EXCEPTIONS
+      INVALID_PARAMETER_COMBINATION = 1 " Wrong Parameter
+      PROGRAM_ERROR                 = 2 " Program Errors
+      TOO_MANY_LINES                = 3 " Too many Rows in Ready for Input Grid
+      OTHERS                        = 4
+  ).
+  IF SY-SUBRC &lt;&gt; 0.
+    MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+      WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form GET_FIELDCAT_0100</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM GET_FIELDCAT_0100  USING PT_DISPLAY  TYPE STANDARD TABLE
+                              PT_FIELDCAT TYPE LVC_T_FCAT.
+  TRY.
+      CALL METHOD CL_SALV_TABLE=&gt;FACTORY
+        IMPORTING
+          R_SALV_TABLE = DATA(LO_SALV_TABLE)           " Basis Class Simple ALV Tables
+        CHANGING
+          T_TABLE      = PT_DISPLAY.
+
+      DATA(LO_COLUMNS) = LO_SALV_TABLE-&gt;GET_COLUMNS( ).
+      DATA(LO_AGGREGATIONS) = LO_SALV_TABLE-&gt;GET_AGGREGATIONS( ).
+
+      PT_FIELDCAT = CL_SALV_CONTROLLER_METADATA=&gt;GET_LVC_FIELDCATALOG(
+        R_COLUMNS = LO_COLUMNS
+        R_AGGREGATIONS = LO_AGGREGATIONS ).
+
+
+    CATCH CX_SALV_MSG. " ALV: General Error Class with Message
+  ENDTRY.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SET_FIELDCAT_0100</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM SET_FIELDCAT_0100 .
+
+  LOOP AT GT_FIELDCAT INTO GS_FIELDCAT.
+    CASE GS_FIELDCAT-FIELDNAME.
+      WHEN 'SAPNR'
+        OR 'SP_YEAR'.
+        GS_FIELDCAT-KEY = ABAP_ON.
+        GS_FIELDCAT-JUST = 'C'.
+      WHEN 'WERKS'
+        OR 'PNAME1'
+        OR 'MATNR'
+        OR 'MAKTX'.
+        GS_FIELDCAT-EMPHASIZE = 'C500'.
+        GS_FIELDCAT-JUST = 'C'.
+      WHEN 'BUKRS'.
+        GS_FIELDCAT-JUST = 'C'.
+      WHEN 'SAPQU'.
+        GS_FIELDCAT-EMPHASIZE = 'C300'.
+        GS_FIELDCAT-QFIELDNAME = 'MEINS'.
+      WHEN 'TOTREV'.
+        GS_FIELDCAT-EMPHASIZE = 'C310'.
+        GS_FIELDCAT-CFIELDNAME = 'WAERS'.
+      WHEN 'SPQTY1' OR 'SPQTY2'  OR 'SPQTY3'  OR 'SPQTY4'
+        OR 'SPQTY5' OR 'SPQTY6'  OR 'SPQTY7'  OR 'SPQTY8'
+        OR 'SPQTY9' OR 'SPQTY10' OR 'SPQTY11' OR 'SPQTY12'.
+        GS_FIELDCAT-QFIELDNAME = 'MEINS'.
+<font color ="#0000FF">*      WHEN 'SEATSMAX_T'</font>
+<font color ="#0000FF">*        OR 'SEATSOCC_T'</font>
+<font color ="#0000FF">*        OR 'SEATSFRE_T'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*        GS_FIELDCAT-COLTEXT = 'Total.' && GS_FIELDCAT-SCRTEXT_S.</font>
+<font color ="#0000FF">*        IF GS_FIELDCAT-FIELDNAME EQ 'SEATSFRE_T'.</font>
+<font color ="#0000FF">*          GS_FIELDCAT-COLTEXT = 'Total.Free'.</font>
+<font color ="#0000FF">*        ENDIF.</font>
+<font color ="#0000FF">*        GS_FIELDCAT-EMPHASIZE = 'C300'.</font>
+    ENDCASE.
+    MODIFY GT_FIELDCAT FROM GS_FIELDCAT.
+  ENDLOOP.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form CREATE_NODE_0100_2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM CREATE_NODE_0100 .
+
+  " NODE를 아래와 같은 구성으로 만듦
+  " 판매년도
+  "  ㄴ 회사코드
+  "       ㄴ 플랜ID : 플랜트명
+  "             ㄴ 자재ID : 자재명
+
+  SORT GT_HEADER BY SP_YEAR BUKRS WERKS MATNR.
+  DATA: LV_NODE_KEY_SUPER TYPE N LENGTH 6,
+        LT_NODE_KEY_LEVEL LIKE TABLE OF GV_NODE_KEY.
+  DATA LV_BUTXT TYPE C LENGTH 25.
+
+  GV_NODE_KEY += 1.
+  CLEAR GS_NODE.
+  GS_NODE-RELATKEY = SPACE. " 가장 최상위의 노드는 항상 공백이여야 한다.
+  GS_NODE-NODE_KEY = LV_NODE_KEY_SUPER = GV_NODE_KEY.
+  GS_NODE-ISFOLDER = ABAP_ON.
+  GS_NODE-TEXT     = '판매년도/회사코드/플랜트명/자재명'.
+  GS_NODE-RELATSHIP = CL_GUI_SIMPLE_TREE=&gt;RELAT_LAST_CHILD.
+  APPEND GS_NODE TO GT_NODE.
+
+  " 1레벨 생성
+  INSERT LV_NODE_KEY_SUPER INTO LT_NODE_KEY_LEVEL INDEX 1.
+
+  CLEAR GS_NODE_INFO.
+  GS_NODE_INFO-SP_YEAR = SPACE.
+  GS_NODE_INFO-BUKRS = SPACE.
+  GS_NODE_INFO-WERKS = SPACE.
+  GS_NODE_INFO-MATNR = SPACE.
+  GS_NODE_INFO-NODE_KEY = GV_NODE_KEY.
+  APPEND GS_NODE_INFO TO GT_NODE_INFO.
+
+  LOOP AT GT_HEADER INTO GS_HEADER.
+    AT NEW SP_YEAR.
+
+      " 폴더 노드 추가
+      GV_NODE_KEY += 1.
+      CLEAR GS_NODE.
+      GS_NODE-RELATKEY = LV_NODE_KEY_SUPER.
+      GS_NODE-NODE_KEY = LV_NODE_KEY_SUPER = GV_NODE_KEY.
+      GS_NODE-ISFOLDER = ABAP_ON.
+      GS_NODE-TEXT     = |{ GS_HEADER-SP_YEAR }년 판매계획|.
+      GS_NODE-RELATSHIP = CL_GUI_SIMPLE_TREE=&gt;RELAT_LAST_CHILD.
+      APPEND GS_NODE TO GT_NODE.
+
+      " 2레벨 생성
+      INSERT LV_NODE_KEY_SUPER INTO LT_NODE_KEY_LEVEL INDEX 1.
+
+
+      CLEAR GS_NODE_INFO.
+      GS_NODE_INFO-SP_YEAR = GS_HEADER-SP_YEAR.
+      GS_NODE_INFO-BUKRS   = SPACE.
+      GS_NODE_INFO-WERKS   = SPACE.
+      GS_NODE_INFO-MATNR   = SPACE.
+      GS_NODE_INFO-NODE_KEY = GV_NODE_KEY.
+      APPEND GS_NODE_INFO TO GT_NODE_INFO.
+
+    ENDAT.
+
+    SELECT SINGLE BUTXT
+      FROM ZEA_FIT000
+      INTO LV_BUTXT
+      WHERE BUKRS EQ GS_HEADER-BUKRS.
+
+    AT NEW BUKRS.
+
+      " 폴더 노드 추가
+      GV_NODE_KEY += 1.
+      CLEAR GS_NODE.
+      GS_NODE-RELATKEY = LV_NODE_KEY_SUPER.
+      GS_NODE-NODE_KEY = LV_NODE_KEY_SUPER = GV_NODE_KEY.
+      GS_NODE-ISFOLDER = ABAP_ON.
+      GS_NODE-TEXT     = |{ GS_HEADER-BUKRS } - { LV_BUTXT }|.
+      GS_NODE-RELATSHIP = CL_GUI_SIMPLE_TREE=&gt;RELAT_LAST_CHILD.
+      APPEND GS_NODE TO GT_NODE.
+
+      " 2레벨 생성
+      INSERT LV_NODE_KEY_SUPER INTO LT_NODE_KEY_LEVEL INDEX 1.
+
+
+      CLEAR GS_NODE_INFO.
+      GS_NODE_INFO-SP_YEAR = GS_HEADER-SP_YEAR.
+      GS_NODE_INFO-BUKRS   = GS_HEADER-BUKRS.
+      GS_NODE_INFO-WERKS   = SPACE.
+      GS_NODE_INFO-MATNR   = SPACE.
+      GS_NODE_INFO-NODE_KEY = GV_NODE_KEY.
+      APPEND GS_NODE_INFO TO GT_NODE_INFO.
+
+    ENDAT.
+
+    AT NEW PNAME1.
+
+      " 폴더 노드 추가
+      GV_NODE_KEY += 1.
+      CLEAR GS_NODE.
+      GS_NODE-RELATKEY = LV_NODE_KEY_SUPER.
+      GS_NODE-NODE_KEY = LV_NODE_KEY_SUPER = GV_NODE_KEY.
+      GS_NODE-ISFOLDER = ABAP_ON.
+      GS_NODE-TEXT     = |{ GS_HEADER-WERKS } : { GS_HEADER-PNAME1 }|.
+      GS_NODE-RELATSHIP = CL_GUI_SIMPLE_TREE=&gt;RELAT_LAST_CHILD.
+      APPEND GS_NODE TO GT_NODE.
+
+      " 2레벨 생성
+      INSERT LV_NODE_KEY_SUPER INTO LT_NODE_KEY_LEVEL INDEX 1.
+
+
+      CLEAR GS_NODE_INFO.
+      GS_NODE_INFO-SP_YEAR = GS_HEADER-SP_YEAR.
+      GS_NODE_INFO-BUKRS   = GS_HEADER-BUKRS.
+      GS_NODE_INFO-WERKS   = GS_HEADER-WERKS.
+      GS_NODE_INFO-MATNR   = SPACE.
+      GS_NODE_INFO-NODE_KEY = GV_NODE_KEY.
+      APPEND GS_NODE_INFO TO GT_NODE_INFO.
+
+    ENDAT.
+
+    IF GS_HEADER-MATNR IS NOT INITIAL.
+      GV_NODE_KEY += 1.
+
+      CLEAR GS_NODE.
+      " 2레벨 노드를 상위노드로 지정
+      GS_NODE-RELATKEY = LV_NODE_KEY_SUPER.
+      GS_NODE-NODE_KEY = GV_NODE_KEY.
+      GS_NODE-ISFOLDER = ABAP_OFF.
+      GS_NODE-N_IMAGE  = ICON_CAR.  " 자동차 모양의 아이콘
+      GS_NODE-TEXT     = |{ GS_HEADER-MATNR } : { GS_HEADER-MAKTX }|.
+      GS_NODE-RELATSHIP = CL_GUI_SIMPLE_TREE=&gt;RELAT_LAST_CHILD.
+      APPEND GS_NODE TO GT_NODE.
+
+      CLEAR GS_NODE_INFO.
+      GS_NODE_INFO-SP_YEAR = GS_HEADER-SP_YEAR.
+      GS_NODE_INFO-BUKRS   = GS_HEADER-BUKRS.
+      GS_NODE_INFO-WERKS   = GS_HEADER-WERKS.
+      GS_NODE_INFO-MATNR   = GS_HEADER-MATNR.
+      GS_NODE_INFO-NODE_KEY = GV_NODE_KEY.
+      APPEND GS_NODE_INFO TO GT_NODE_INFO.
+    ELSE.
+      " 항공편이 없는 경우
+    ENDIF.
+
+    AT END OF PNAME1.
+
+      " 2레벨 제거 및 1레벨의 상위노드 정보 조회
+      DELETE LT_NODE_KEY_LEVEL INDEX 1.
+      READ TABLE LT_NODE_KEY_LEVEL INTO LV_NODE_KEY_SUPER INDEX 1.
+
+    ENDAT.
+
+    AT END OF BUKRS.
+
+      " 2레벨 제거 및 1레벨의 상위노드 정보 조회
+      DELETE LT_NODE_KEY_LEVEL INDEX 1.
+      READ TABLE LT_NODE_KEY_LEVEL INTO LV_NODE_KEY_SUPER INDEX 1.
+
+
+    ENDAT.
+
+
+    AT END OF SP_YEAR.
+
+      " 2레벨 제거 및 1레벨의 상위노드 정보 조회
+      DELETE LT_NODE_KEY_LEVEL INDEX 1.
+      READ TABLE LT_NODE_KEY_LEVEL INTO LV_NODE_KEY_SUPER INDEX 1.
+
+    ENDAT.
+
+  ENDLOOP.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form HANDLER_TOOLBAR</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM HANDLER_TOOLBAR    USING PO_OBJECT TYPE REF TO CL_ALV_EVENT_TOOLBAR_SET
+                              PO_SENDER TYPE REF TO CL_GUI_ALV_GRID.
+
+  " Internal Table PO_OBJECT-&gt;MT_TOOLBAR 를 위한 작업공간
+  " PO_OBJECT-&gt;MT_TOOLBAR &gt;&gt;&gt; 클래스의 Attribute ( Public , Instance )
+  DATA LS_TOOLBAR LIKE LINE OF PO_OBJECT-&gt;MT_TOOLBAR.
+
+  CASE PO_SENDER.
+    WHEN GO_ALV_GRID_TOP.
+
+<font color ="#0000FF">* 구분자 =&gt;&gt; |</font>
+      CLEAR LS_TOOLBAR.
+      LS_TOOLBAR-BUTN_TYPE = 3. " 구분자
+      APPEND LS_TOOLBAR TO PO_OBJECT-&gt;MT_TOOLBAR.
+
+<font color ="#0000FF">* 버튼추가 =&gt;&gt; 생산계획 생성</font>
+      CLEAR LS_TOOLBAR.
+      LS_TOOLBAR-FUNCTION = GC_CALC_MPS.
+      LS_TOOLBAR-TEXT = TEXT-L01.
+      LS_TOOLBAR-ICON = ICON_INTENSIFY.
+      APPEND LS_TOOLBAR TO PO_OBJECT-&gt;MT_TOOLBAR.
+  ENDCASE.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form HANDLE_USER_COMMAND</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM HANDLE_USER_COMMAND  USING PV_UCOMM TYPE SY-UCOMM
+                               PO_SENDER  TYPE REF TO CL_GUI_ALV_GRID.
+
+<font color ="#0000FF">*  CALL METHOD GO_ALV_GRID_TOP-&gt;CHECK_CHANGED_DATA.</font>
+
+  CASE PO_SENDER.
+    WHEN GO_ALV_GRID_TOP. "PO_SENDER 가 GO_ALV_GRID_TOP 일 때
+      CASE PV_UCOMM.  " 선택한 버튼 (PV_UCOMM은 SY-UCOMM 타입)
+        WHEN GC_CALC_MPS.
+          IF GS_NODE_INFO-SP_YEAR LT SY-DATUM(4) AND GS_NODE_INFO-BUKRS EQ 1000 AND GS_NODE_INFO-WERKS EQ SPACE.
+            MESSAGE S000 DISPLAY LIKE 'W' WITH '올해 이전의 판매계획은 생산계획으로 수립할 수 없습니다.'.
+
+          ELSEIF GS_NODE_INFO-BUKRS EQ 1000 AND GS_NODE_INFO-WERKS EQ SPACE.
+
+            PERFORM MOVE_DATA_TO_0110.
+            CALL SCREEN 0110 STARTING AT 70 2.
+            PERFORM REFRESH_ALV_0100.
+
+          ELSEIF GS_NODE_INFO-SP_YEAR GE SY-DATUM(4) AND GS_NODE_INFO-BUKRS EQ SPACE.
+
+            PERFORM MOVE_DATA_TO_0110.
+            CALL SCREEN 0110 STARTING AT 70 2.
+            PERFORM REFRESH_ALV_0100.
+
+          ELSEIF GS_NODE_INFO-SP_YEAR LT SY-DATUM(4) AND GS_NODE_INFO-BUKRS EQ SPACE.
+            MESSAGE S000 DISPLAY LIKE 'W' WITH '올해 이전의 판매계획은 생산계획으로 수립할 수 없습니다.'.
+          ELSE.
+            MESSAGE S076 DISPLAY LIKE 'W'. " 생산계획은 1000번 회사코드에서만 수립할 수 있습니다.
+            EXIT.
+          ENDIF.
+
+      ENDCASE.
+
+    WHEN GO_ALV_GRID_BOT. "PO_SENDER 가 GO_ALV_GRID_TOP 일 때
+      CASE PV_UCOMM.  " 선택한 버튼 (PV_UCOMM은 SY-UCOMM 타입)
+
+        WHEN GC_NO_FILTER.
+          PERFORM NO_FILTER.
+
+        WHEN GC_NO_USE_MPS.
+          PERFORM NO_USE_MPS_FILTER.
+
+        WHEN GC_USE_MPS.
+          PERFORM USE_MPS_FILTER.
+
+      ENDCASE.
+  ENDCASE.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form REFRESH_ALV_0100 : GRID, GRID2 같이 Refresh</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM REFRESH_ALV_0100 .
+
+  DATA LS_STABLE TYPE LVC_S_STBL.
+  LS_STABLE-ROW = ABAP_ON.
+  LS_STABLE-COL = ABAP_ON.
+
+  CALL METHOD GO_ALV_GRID_TOP-&gt;REFRESH_TABLE_DISPLAY
+    EXPORTING
+      IS_STABLE = LS_STABLE  " With Stable Rows/Columns
+<font color ="#0000FF">*     I_SOFT_REFRESH =           " Without Sort, Filter, etc.</font>
+    EXCEPTIONS
+      FINISHED  = 1                " Display was Ended (by Export)
+      OTHERS    = 2.
+
+  IF SY-SUBRC &lt;&gt; 0.
+    MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+      WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+  ENDIF.
+
+  CALL METHOD GO_ALV_GRID_BOT-&gt;REFRESH_TABLE_DISPLAY
+    EXPORTING
+      IS_STABLE = LS_STABLE  " With Stable Rows/Columns
+<font color ="#0000FF">*     I_SOFT_REFRESH =           " Without Sort, Filter, etc.</font>
+    EXCEPTIONS
+      FINISHED  = 1                " Display was Ended (by Export)
+      OTHERS    = 2.
+
+  IF SY-SUBRC &lt;&gt; 0.
+    MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+      WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+  ENDIF.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form NO_FILTER</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM NO_FILTER .
+
+  REFRESH GT_FILTER.
+
+  PERFORM SET_ALV_FILTER.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form SET_ALV_FILTER</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM SET_ALV_FILTER .
+
+  " ALV에 Filter 정보를 적용하는 과정
+  CALL METHOD GO_ALV_GRID_BOT-&gt;SET_FILTER_CRITERIA
+    EXPORTING
+      IT_FILTER = GT_FILTER                " Filter Conditions
+    EXCEPTIONS
+      OTHERS    = 1.
+
+  IF SY-SUBRC NE 0.
+    MESSAGE E000 WITH '필터 적용에 실패하였습니다'.
+  ENDIF.
+
+  " ALV가 새로고침될 때, 현재 라인, 열을 유지할 지
+  DATA LS_STABLE TYPE LVC_S_STBL.
+  LS_STABLE-ROW = ABAP_ON.
+  LS_STABLE-COL = ABAP_ON.
+
+  " 적용된 Filter 기준으로 데이터를 출력
+  CALL METHOD GO_ALV_GRID_BOT-&gt;REFRESH_TABLE_DISPLAY
+    EXPORTING
+      IS_STABLE = LS_STABLE                  " With Stable Rows/Columns
+<font color ="#0000FF">*     I_SOFT_REFRESH =                  " Without Sort, Filter, etc.</font>
+    EXCEPTIONS
+      OTHERS    = 1.
+
+  IF SY-SUBRC NE 0.
+    MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+      WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+  ENDIF.
+
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form NO_USE_MPS_FILTER</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM NO_USE_MPS_FILTER .
+
+  REFRESH GT_FILTER.
+
+  CLEAR GS_FILTER.
+  GS_FILTER-FIELDNAME = 'LIGHT'.
+  GS_FILTER-SIGN      = 'I'.
+  GS_FILTER-OPTION    = 'EQ'.
+  GS_FILTER-LOW       = '1'.
+  APPEND GS_FILTER TO GT_FILTER.
+
+  PERFORM SET_ALV_FILTER.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form USE_MPS_FILTER</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM USE_MPS_FILTER .
+
+  REFRESH GT_FILTER.
+
+  CLEAR GS_FILTER.
+  GS_FILTER-FIELDNAME = 'LIGHT'.
+  GS_FILTER-SIGN      = 'I'.
+  GS_FILTER-OPTION    = 'EQ'.
+  GS_FILTER-LOW       = '2'.
+  APPEND GS_FILTER TO GT_FILTER.
+
+  PERFORM SET_ALV_FILTER.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form HANDLER_TOOLBAR2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM HANDLER_TOOLBAR2  USING PO_OBJECT TYPE REF TO CL_ALV_EVENT_TOOLBAR_SET
+                              PO_SENDER TYPE REF TO CL_GUI_ALV_GRID.
+
+  DATA LS_TOOLBAR2 LIKE LINE OF PO_OBJECT-&gt;MT_TOOLBAR.
+
+  CASE PO_SENDER.
+
+    WHEN GO_ALV_GRID_BOT.
+
+      DATA LV_TOTAL TYPE I.
+      DATA LV_GREEN TYPE I.
+      DATA LV_RED TYPE I.
+
+      DESCRIBE TABLE GT_DISPLAY2.
+
+      LOOP AT GT_DISPLAY2 INTO GS_DISPLAY2.
+        ADD 1 TO LV_TOTAL.
+
+        CASE GS_DISPLAY2-LIGHT.
+          WHEN '1'. ADD 1 TO LV_RED.
+          WHEN '2'. ADD 1 TO LV_GREEN.
+        ENDCASE.
+
+      ENDLOOP.
+
+<font color ="#0000FF">* 구분자 =&gt;&gt; |</font>
+      CLEAR LS_TOOLBAR2.
+      LS_TOOLBAR2-BUTN_TYPE = 3. " 구분자
+      APPEND LS_TOOLBAR2 TO PO_OBJECT-&gt;MT_TOOLBAR.
+
+<font color ="#0000FF">* 버튼 추가 =&gt;&gt; 전체</font>
+      CLEAR LS_TOOLBAR2.
+      LS_TOOLBAR2-FUNCTION = GC_NO_FILTER.
+      LS_TOOLBAR2-TEXT = | 전체조회 : { SY-TFILL } |.
+      LS_TOOLBAR2-ICON = ICON_SEARCH.
+      APPEND LS_TOOLBAR2 TO PO_OBJECT-&gt;MT_TOOLBAR.
+
+<font color ="#0000FF">* 버튼 추가 =&gt;&gt; 삭제 X</font>
+      CLEAR LS_TOOLBAR2.
+      LS_TOOLBAR2-FUNCTION = GC_USE_MPS.
+      LS_TOOLBAR2-ICON = ICON_LED_GREEN.
+      LS_TOOLBAR2-TEXT = | 사용중 : { LV_GREEN }  |.
+      APPEND LS_TOOLBAR2 TO PO_OBJECT-&gt;MT_TOOLBAR.
+
+<font color ="#0000FF">* 버튼 추가 =&gt;&gt; 삭제 O</font>
+      CLEAR LS_TOOLBAR2.
+      LS_TOOLBAR2-FUNCTION = GC_NO_USE_MPS.
+      LS_TOOLBAR2-ICON = ICON_LED_RED.
+      LS_TOOLBAR2-TEXT = | 미사용 : { LV_RED }  |.
+      APPEND LS_TOOLBAR2 TO PO_OBJECT-&gt;MT_TOOLBAR.
+
+
+
+  ENDCASE.
+
+ENDFORM.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form DISPLAY_DATA</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM DISPLAY_DATA .
+
+  CHECK SY-UNAME EQ 'ACA5-03'
+   OR SY-UNAME EQ 'ACA5-07'
+   OR SY-UNAME EQ 'ACA5-08'
+   OR SY-UNAME EQ 'ACA5-10'
+   OR SY-UNAME EQ 'ACA5-12'
+   OR SY-UNAME EQ 'ACA5-15'
+   OR SY-UNAME EQ 'ACA5-17'
+   OR SY-UNAME EQ 'ACA5-23'
+   OR SY-UNAME EQ 'ACA-05'
+   OR SY-UNAME EQ 'aca5-09'.
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

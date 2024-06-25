@@ -1,0 +1,458 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZEA_PP090_PBO</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZEA_PP090_PBO</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include YE00_EX007PBO</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          YE00_EX007PBO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module STATUS_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE STATUS_0100 OUTPUT.
+  SET PF-STATUS '0100'.
+  SET TITLEBAR  '0100'. "[PP] 생산오더 생성
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module INIT_OBJECT_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE INIT_OBJECT_0100 OUTPUT.
+
+  IF GO_CUSTOM_CONTAINER IS INITIAL.
+
+    PERFORM CREATE_OBJECT_0100.
+
+<font color ="#0000FF">*    " TREE 관련 Subroutines</font>
+    PERFORM CREATE_NODE_0100.   " 1 ~ 50
+<font color ="#0000FF">**    PERFORM CREATE_NODE_0100_2. " 1 ~ 50</font>
+
+    SORT GT_NODE_INFO BY NODE_KEY.
+
+    CALL METHOD GO_SIMPLE_TREE-&gt;ADD_NODES
+      EXPORTING
+        TABLE_STRUCTURE_NAME           = 'MTREESNODE'     " Name of Structure of Node Table
+        NODE_TABLE                     = GT_NODE          " Node table
+      EXCEPTIONS
+        ERROR_IN_NODE_TABLE            = 1                " Node Table Contains Errors
+        FAILED                         = 2                " General error
+        DP_ERROR                       = 3                " Error in Data Provider
+        TABLE_STRUCTURE_NAME_NOT_FOUND = 4                " Unable to Find Structure in Dictionary
+        OTHERS                         = 5.
+    IF SY-SUBRC &lt;&gt; 0.
+      MESSAGE E025. " TREE NODE 생성 중 오류가 발생했습니다.
+    ENDIF.
+
+    PERFORM EXPAND_ROOT_NODE_0100.
+    PERFORM SET_TREE_EVENT_0100.
+
+<font color ="#0000FF">*    " ALV 관련 Subroutines</font>
+    PERFORM SET_ALV_LAYOUT_0100.
+    PERFORM SET_ALV_FIELDCAT_0100.
+    PERFORM SET_ALV_EVENT_0100.
+    PERFORM DISPLAY_ALV_0100.
+
+  ENDIF.
+
+  IF GO_CONTAINER IS INITIAL.
+    PERFORM CREATE_OBJECT_SPLIT_0100.
+    PERFORM SET_ALV_FIELDCAT_SPLIT_0100.
+    PERFORM SET_ALV_LIST_SPLIT_0100.
+    PERFORM SET_ALV_LAYOUT_SPLIT_0100.
+    PERFORM SET_ALV_EVENT_SPLIT_0100.
+    PERFORM DISPLAY_ALV_SPLIT_0100.
+  ELSE.
+    PERFORM REFRESH_ALV_SPLIT_0100.
+<font color ="#0000FF">*    PERFORM MODIFY_DISPLAY_DATA.</font>
+  ENDIF.
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module CLEAR_OK_CODE OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE CLEAR_OK_CODE OUTPUT.
+
+  CLEAR OK_CODE.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module STATUS_0110 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE STATUS_0110 OUTPUT.
+  SET PF-STATUS '0110'.
+  SET TITLEBAR '0110'.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module INIT_DATA_0110 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE INIT_DATA_0110 OUTPUT.
+
+  READ TABLE GT_DISPLAY INTO GS_DISPLAY INDEX GS_INDEX_ROW-INDEX.
+
+<font color ="#0000FF">*     이미 존재하는 생산오더가 있으면 존재하는 월의 체크필드를 잠군다.</font>
+<font color ="#0000FF">*  REFRESH GT_PPT020.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  SELECT *</font>
+<font color ="#0000FF">*    FROM ZEA_PPT020 AS A</font>
+<font color ="#0000FF">*    JOIN ZEA_AUFK   AS B ON B~AUFNR EQ A~AUFNR</font>
+<font color ="#0000FF">*    JOIN ZEA_MMT020 AS C ON C~MATNR EQ A~MATNR</font>
+<font color ="#0000FF">*                        AND C~SPRAS EQ SY-LANGU</font>
+<font color ="#0000FF">*    JOIN ZEA_T001W  AS D ON D~WERKS EQ A~WERKS</font>
+<font color ="#0000FF">*    INTO CORRESPONDING FIELDS OF TABLE GT_PPT020</font>
+<font color ="#0000FF">*    WHERE B~PLANID EQ GS_DISPLAY-PLANID</font>
+<font color ="#0000FF">*      AND A~MATNR  EQ GS_DISPLAY-MATNR.</font>
+
+<font color ="#0000FF">*  LOOP AT GT_PPT020 INTO GS_PPT020.</font>
+<font color ="#0000FF">*    CASE GS_PPT020-EXPSDATE+0(6).</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE1+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-1MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE2+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-2MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE3+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-3MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE4+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-4MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE5+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-5MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE6+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-6MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE7+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-7MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE8+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-8MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE9+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-9MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE10+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-10MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE11+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-11MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*      WHEN S0110-EXPSDATE12+0(6).</font>
+<font color ="#0000FF">*        LOOP AT SCREEN.</font>
+<font color ="#0000FF">*          CASE SCREEN-NAME.</font>
+<font color ="#0000FF">*            WHEN 'S0110-12MONTH'.</font>
+<font color ="#0000FF">*              SCREEN-INPUT = 0.</font>
+<font color ="#0000FF">*          ENDCASE.</font>
+<font color ="#0000FF">*          MODIFY SCREEN.</font>
+<font color ="#0000FF">*        ENDLOOP.</font>
+<font color ="#0000FF">*    ENDCASE.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  ENDLOOP.</font>
+
+
+<font color ="#0000FF">* 체크버튼 토글 버튼 구현</font>
+  FIELD-SYMBOLS &lt;FS&gt;.
+
+  DATA LV_CHECK TYPE C.
+
+  LOOP AT SCREEN.
+    CASE SCREEN-NAME+7(3).
+      WHEN 'MON' OR '0MO' OR '1MO' OR '2MO'.
+<font color ="#0000FF">*        ASSIGN COMPONENT SCREEN-NAME+6 OF STRUCTURE S0110 TO &lt;FS&gt;.</font>
+<font color ="#0000FF">*        IF SY-SUBRC EQ 0.</font>
+<font color ="#0000FF">*          LV_CHECK = &lt;FS&gt;.</font>
+<font color ="#0000FF">*          UNASSIGN &lt;FS&gt;.</font>
+<font color ="#0000FF">*        ENDIF.</font>
+
+        ASSIGN (SCREEN-NAME) TO &lt;FS&gt;.
+        IF &lt;FS&gt; IS ASSIGNED.
+          GV_CHECK = &lt;FS&gt;.
+          UNASSIGN &lt;FS&gt;.
+        ENDIF.
+
+      WHEN 'XPS' OR 'XPE' OR 'XPQ'.
+        IF GV_CHECK EQ ABAP_ON.
+          SCREEN-INPUT = 1.
+          MODIFY SCREEN.
+        ELSE.
+
+        ENDIF.
+    ENDCASE.
+  ENDLOOP.
+
+  DATA LV_MONTH TYPE C LENGTH 2.
+  LV_MONTH = SY-DATUM+4(2).
+
+  CASE LV_MONTH.
+    WHEN '01'.
+    WHEN '02'.
+      LOOP AT SCREEN.
+        CASE SCREEN-NAME.
+          WHEN 'S0110-1MONTH'.
+            SCREEN-INPUT = 0.
+        ENDCASE.
+        MODIFY SCREEN.
+      ENDLOOP.
+    WHEN '03'.
+      LOOP AT SCREEN.
+        CASE SCREEN-NAME.
+          WHEN 'S0110-1MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-2MONTH'.
+            SCREEN-INPUT = 0.
+        ENDCASE.
+        MODIFY SCREEN.
+      ENDLOOP.
+    WHEN '04'.
+      LOOP AT SCREEN.
+        CASE SCREEN-NAME.
+          WHEN 'S0110-1MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-2MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-3MONTH'.
+            SCREEN-INPUT = 0.
+        ENDCASE.
+        MODIFY SCREEN.
+      ENDLOOP.
+    WHEN '05'.
+      LOOP AT SCREEN.
+        CASE SCREEN-NAME.
+          WHEN 'S0110-1MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-2MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-3MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-4MONTH'.
+            SCREEN-INPUT = 0.
+        ENDCASE.
+        MODIFY SCREEN.
+      ENDLOOP.
+    WHEN '06'.
+      LOOP AT SCREEN.
+        CASE SCREEN-NAME.
+          WHEN 'S0110-1MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-2MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-3MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-4MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-5MONTH'.
+            SCREEN-INPUT = 0.
+        ENDCASE.
+        MODIFY SCREEN.
+      ENDLOOP.
+    WHEN '07'.
+      LOOP AT SCREEN.
+        CASE SCREEN-NAME.
+          WHEN 'S0110-1MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-2MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-3MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-4MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-5MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-6MONTH'.
+            SCREEN-INPUT = 0.
+        ENDCASE.
+        MODIFY SCREEN.
+      ENDLOOP.
+    WHEN '08'.
+      LOOP AT SCREEN.
+        CASE SCREEN-NAME.
+          WHEN 'S0110-1MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-2MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-3MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-4MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-5MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-6MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-7MONTH'.
+            SCREEN-INPUT = 0.
+        ENDCASE.
+        MODIFY SCREEN.
+      ENDLOOP.
+    WHEN '09'.
+      LOOP AT SCREEN.
+        CASE SCREEN-NAME.
+          WHEN 'S0110-1MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-2MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-3MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-4MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-5MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-6MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-7MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-8MONTH'.
+            SCREEN-INPUT = 0.
+        ENDCASE.
+        MODIFY SCREEN.
+      ENDLOOP.
+    WHEN '10'.
+      LOOP AT SCREEN.
+        CASE SCREEN-NAME.
+          WHEN 'S0110-1MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-2MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-3MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-4MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-5MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-6MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-7MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-8MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-9MONTH'.
+            SCREEN-INPUT = 0.
+        ENDCASE.
+        MODIFY SCREEN.
+      ENDLOOP.
+    WHEN '11'.
+      LOOP AT SCREEN.
+        CASE SCREEN-NAME.
+          WHEN 'S0110-1MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-2MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-3MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-4MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-5MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-6MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-7MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-8MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-9MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-10MONTH'.
+            SCREEN-INPUT = 0.
+        ENDCASE.
+        MODIFY SCREEN.
+      ENDLOOP.
+    WHEN '12'.
+      LOOP AT SCREEN.
+        CASE SCREEN-NAME.
+          WHEN 'S0110-1MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-2MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-3MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-4MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-5MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-6MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-7MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-8MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-9MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-10MONTH'.
+            SCREEN-INPUT = 0.
+          WHEN 'S0110-11MONTH'.
+            SCREEN-INPUT = 0.
+        ENDCASE.
+        MODIFY SCREEN.
+      ENDLOOP.
+  ENDCASE.
+
+ENDMODULE.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

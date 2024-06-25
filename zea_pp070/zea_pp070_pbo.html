@@ -1,0 +1,149 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZEA_PP070_PBO</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZEA_PP070_PBO</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include YE00_EX007PBO</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          YE00_EX007PBO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module STATUS_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE STATUS_0100 OUTPUT.
+  SET PF-STATUS '0100'.
+  SET TITLEBAR  '0100'. "[PP] MRP 계산
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module INIT_OBJECT_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE INIT_OBJECT_0100 OUTPUT.
+
+  IF GO_CUSTOM_CONTAINER IS INITIAL.
+
+    PERFORM CREATE_OBJECT_0100.
+
+<font color ="#0000FF">*    " TREE 관련 Subroutines</font>
+    PERFORM CREATE_NODE_0100.   " 1 ~ 50
+<font color ="#0000FF">**    PERFORM CREATE_NODE_0100_2. " 1 ~ 50</font>
+
+    SORT GT_NODE_INFO BY NODE_KEY.
+
+    CALL METHOD GO_SIMPLE_TREE-&gt;ADD_NODES
+      EXPORTING
+        TABLE_STRUCTURE_NAME           = 'MTREESNODE'     " Name of Structure of Node Table
+        NODE_TABLE                     = GT_NODE          " Node table
+      EXCEPTIONS
+        ERROR_IN_NODE_TABLE            = 1                " Node Table Contains Errors
+        FAILED                         = 2                " General error
+        DP_ERROR                       = 3                " Error in Data Provider
+        TABLE_STRUCTURE_NAME_NOT_FOUND = 4                " Unable to Find Structure in Dictionary
+        OTHERS                         = 5.
+    IF SY-SUBRC &lt;&gt; 0.
+      MESSAGE E025. " TREE NODE 생성 중 오류가 발생했습니다.
+    ENDIF.
+
+    PERFORM EXPAND_ROOT_NODE_0100.
+    PERFORM SET_TREE_EVENT_0100.
+
+<font color ="#0000FF">*    " ALV 관련 Subroutines</font>
+    PERFORM SET_ALV_LAYOUT_0100.
+    PERFORM SET_ALV_FIELDCAT_0100.
+    PERFORM SET_ALV_EVENT_0100.
+    PERFORM DISPLAY_ALV_0100.
+  ELSE.
+    PERFORM REFRESH_ALV_0100.
+  ENDIF.
+
+
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module CLEAR_OK_CODE OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE CLEAR_OK_CODE OUTPUT.
+  CLEAR OK_CODE.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module STATUS_0110 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE STATUS_0110 OUTPUT.
+ SET PF-STATUS '0110'.
+ SET TITLEBAR '0110'. " 자재소요량 계산
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module STATUS_0120 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE STATUS_0120 OUTPUT.
+ SET PF-STATUS '0120'.
+ SET TITLEBAR '0120'.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module INIT_OBJECT_0120 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE INIT_OBJECT_0120 OUTPUT.
+
+  IF GO_CUSTOM_CONTAINER4 IS INITIAL.
+    PERFORM CREATE_OBJECT_0120.
+    PERFORM SET_ALV_LAYOUT_0120.
+    PERFORM SET_ALV_FIELDCAT_0120.
+    PERFORM DISPLAY_ALV_0120.
+  ELSE.
+    PERFORM REFRESH_ALV_0120.
+  ENDIF.
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Form CREATE_OBJECT_0120</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& --&gt;  p1        text</font>
+<font color ="#0000FF">*& &lt;--  p2        text</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+FORM CREATE_OBJECT_0120 .
+
+    CREATE OBJECT GO_CUSTOM_CONTAINER4
+    EXPORTING
+      CONTAINER_NAME = GC_CUSTOM_CONTAINER_NAME4
+    EXCEPTIONS
+      OTHERS         = 1.
+
+  IF SY-SUBRC NE 0.
+    MESSAGE E020. " Custom Container 생성 중 오류가 발생했습니다.
+<font color ="#0000FF">*   MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO</font>
+<font color ="#0000FF">*     WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.</font>
+  ENDIF.
+
+
+  CREATE OBJECT GO_ALV_GRID4
+    EXPORTING
+      I_PARENT = GO_CUSTOM_CONTAINER4
+    EXCEPTIONS
+      OTHERS   = 1.
+
+  IF SY-SUBRC NE 0.
+    MESSAGE E021. " ALV Grid 생성 중 오류가 발생했습니다.
+<font color ="#0000FF">*   MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO</font>
+<font color ="#0000FF">*     WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.</font>
+  ENDIF.
+
+
+ENDFORM.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

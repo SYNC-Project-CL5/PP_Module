@@ -1,0 +1,65 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>SAPMZEA_PP220</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: SAPMZEA_PP220</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [PP] 생산검수 및 입고</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module Pool      SAPMZEA_03</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& [PP] 생산 검수 및 검수</font>
+<font color ="#0000FF">*& [2024.04.26 / 단위 테스트 완료] - [PM] 김건우 : o</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+
+include <a href ="mzea_pp220top.html">MZEA_PP220TOP</a>.
+<font color ="#0000FF">*INCLUDE SAPMZEA_03TOP.   " Global Data</font>
+include <a href ="mzea_pp220cls.html">MZEA_PP220CLS</a>.
+<font color ="#0000FF">*INCLUDE SAPMZEA_03CLS.   " Class</font>
+include <a href ="mzea_pp220o01.html">MZEA_PP220O01</a>.
+<font color ="#0000FF">*INCLUDE SAPMZEA_03O01.   " PBO-Modules</font>
+include <a href ="mzea_pp220i01.html">MZEA_PP220I01</a>.
+<font color ="#0000FF">*INCLUDE SAPMZEA_03I01.   " PAI-Modules</font>
+include <a href ="mzea_pp220f01.html">MZEA_PP220F01</a>.
+<font color ="#0000FF">*INCLUDE SAPMZEA_03F01.   " FORM-Routines</font>
+
+LOAD-OF-PROGRAM.
+
+  PERFORM INIT_VAL.
+  PERFORM INIT_LISTBOX.
+
+<font color ="#0000FF">*GUI Texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* 0100 --&gt; [PP] 생산검수 및 입고</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: Hard coded</font>
+<font color ="#0000FF">*   컨테이너 생성에 실패했습니다.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZEA_MSG</font>
+<font color ="#0000FF">*000   & & & &</font>
+<font color ="#0000FF">*006   & 건의 데이터가 검색되었습니다.</font>
+<font color ="#0000FF">*020   Custom Container 생성 중 오류가 발생했습니다.</font>
+<font color ="#0000FF">*021   ALV Grid 생성 중 오류가 발생했습니다.</font>
+<font color ="#0000FF">*023   ALV Grid 에 데이터를 전달하는 중 오류가 발생했습니다.</font>
+<font color ="#0000FF">*026   올바른 사원코드를 입력해주세요.</font>
+<font color ="#0000FF">*065   결재가 완료되었습니다.</font>
+<font color ="#0000FF">*066   폐기사유가 저장되었습니다. 결재를 수행해주세요.</font>
+<font color ="#0000FF">*067   미결재 건입니다. 결재를 진행해주세요.</font>
+<font color ="#0000FF">*069   폐기수량이 생산수량보다 큽니다. 옳바른 값을 입력해주세요.</font>
+<font color ="#0000FF">*070   검수가 진행되지 않은 실적입니다.</font>
+<font color ="#0000FF">*071   입고신청이 완료되었습니다. 생성된 배치번호는 & 입니다.</font>
+<font color ="#0000FF">*079   검수일자는 금일만 가능합니다.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZEA_MM_PPFG</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for function: ZEA_MM_PPFG</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [MM]자재문서 PP 함수</b></font>
+<hr>
+<pre width="100">
+FUNCTION ZEA_MM_PPFG.
+<font color ="#0000FF">*"----------------------------------------------------------------------</font>
+<font color ="#0000FF">*"*"Local Interface:</font>
+<font color ="#0000FF">*"  IMPORTING</font>
+<font color ="#0000FF">*"     REFERENCE(IV_AUFNR) TYPE  ZEA_AUFK-AUFNR</font>
+<font color ="#0000FF">*"     REFERENCE(IT_ITEM) TYPE  ZEA_MMY190</font>
+<font color ="#0000FF">*"  EXPORTING</font>
+<font color ="#0000FF">*"     REFERENCE(ES_HEAD) TYPE  ZEA_MMT090</font>
+<font color ="#0000FF">*"     REFERENCE(ET_ITEM) TYPE  ZEA_MMY100</font>
+<font color ="#0000FF">*"----------------------------------------------------------------------</font>
+
+<font color ="#0000FF">*       <a href ="global-zea_mm_ppfg.html">Global data declarations</a></font>
+
+<font color ="#0000FF">*DATA: BEGIN OF TS_ZEA_AUFK,</font>
+<font color ="#0000FF">*        AUFNR    TYPE ZEA_AUFK-AUFNR,</font>
+<font color ="#0000FF">*        WERKS    TYPE ZEA_AUFK-WERKS,</font>
+<font color ="#0000FF">*        MATNR    TYPE ZEA_AUFK-MATNR,</font>
+<font color ="#0000FF">*        TOT_QTY  TYPE ZEA_AUFK-TOT_QTY,</font>
+<font color ="#0000FF">*        MEINS    TYPE ZEA_AUFK-MEINS,</font>
+<font color ="#0000FF">*        APPROVAL TYPE ZEA_AUFK-APPROVAL,</font>
+<font color ="#0000FF">*        APPROVER TYPE ZEA_AUFK-APPROVER,</font>
+<font color ="#0000FF">*      END OF TS_ZEA_AUFK.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">***   7번 넘버레인지 자재문서 번호</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">*  CLEAR: GS_AUFK, GS_PPT020.</font>
+<font color ="#0000FF">*  REFRESH: GT_AUFK, GT_PPT020.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  DATA: GT_STPO TYPE TABLE OF ZEA_STPO,</font>
+<font color ="#0000FF">*        GS_STPO LIKE LINE OF GT_STPO.</font>
+<font color ="#0000FF">*  DATA: GT_MMT070 TYPE TABLE OF ZEA_MMT070,</font>
+<font color ="#0000FF">*        GS_MMT070 LIKE LINE OF GT_MMT070.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  SELECT *</font>
+<font color ="#0000FF">*    FROM ZEA_AUFK AS A</font>
+<font color ="#0000FF">*    JOIN ZEA_PPT020 AS B</font>
+<font color ="#0000FF">*      ON A~AUFNR EQ B~AUFNR</font>
+<font color ="#0000FF">*    JOIN ZEA_STPO AS C</font>
+<font color ="#0000FF">*      ON C~BOMID EQ B~BOMID</font>
+<font color ="#0000FF">*    JOIN ZEA_MMT070 AS D</font>
+<font color ="#0000FF">*      ON D~MATNR EQ A~MATNR</font>
+<font color ="#0000FF">*    INTO CORRESPONDING FIELDS OF TABLE @GT_AUFK</font>
+<font color ="#0000FF">*    WHERE A~AUFNR EQ @IV_AUFNR.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  SELECT SINGLE *</font>
+<font color ="#0000FF">*    FROM ZEA_PPT020</font>
+<font color ="#0000FF">*    INTO CORRESPONDING FIELDS OF @GS_PPT020</font>
+<font color ="#0000FF">*    WHERE AUFNR  EQ @IV_AUFNR.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  SELECT *</font>
+<font color ="#0000FF">*    FROM ZEA_STPO AS A</font>
+<font color ="#0000FF">*    INNER JOIN ZEA_STKO AS B</font>
+<font color ="#0000FF">*      ON B~BOMID EQ A~BOMID</font>
+<font color ="#0000FF">*    INTO CORRESPONDING FIELDS OF TABLE GT_STPO</font>
+<font color ="#0000FF">*    WHERE B~MATNR EQ GS_PPT020-MATNR.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  SELECT *</font>
+<font color ="#0000FF">*    FROM ZEA_MMT070</font>
+<font color ="#0000FF">*    INTO CORRESPONDING FIELDS OF TABLE GT_MMT070</font>
+<font color ="#0000FF">*    WHERE MATNR EQ GS_MMT070-MATNR</font>
+<font color ="#0000FF">*      AND WERKS EQ GS_MMT070-WERKS.</font>
+<font color ="#0000FF">*    READ TABLE GT_PPT020 INTO GS_PPT020 INDEX 1.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  SELECT SINGLE STPRS</font>
+<font color ="#0000FF">*    FROM ZEA_MMT010</font>
+<font color ="#0000FF">*   INTO @DATA(LV_STPRS)</font>
+<font color ="#0000FF">*    WHERE MATNR EQ @GS_PPT020-MATNR.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* "ZEA_MMT090 따라서 만든 itab wa 선언</font>
+<font color ="#0000FF">*  DATA : GT_MMT090 TYPE TABLE OF ZEA_MMT090,</font>
+<font color ="#0000FF">*         GS_MMT090 TYPE ZEA_MMT090.</font>
+<font color ="#0000FF">* "ZEA_MMT100 따라서 만든 itab wa를 선언</font>
+<font color ="#0000FF">*  DATA : GT_MMT100 TYPE TABLE OF ZEA_MMT100,</font>
+<font color ="#0000FF">*         GS_MMT100 LIKE LINE OF GT_MMT100.</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">***--------------------------------------------------------------------*</font>
+<font color ="#0000FF">*** 자재문서 헤더 생성</font>
+<font color ="#0000FF">***--------------------------------------------------------------------*</font>
+<font color ="#0000FF">*** MBLNR  자재문서 번호 KEY    AUFNR      생산오더 ID KEY</font>
+<font color ="#0000FF">*** GJAHR  회계연도             WERKS      플랜트ID</font>
+<font color ="#0000FF">*** WERKS  플랜트ID             PLANID     생산계획 ID</font>
+<font color ="#0000FF">*** VGART  트랜잭션 유형        MATNR      자재코드</font>
+<font color ="#0000FF">*** BUDAT  전기일자             TOT_QTY    총 오더수량</font>
+<font color ="#0000FF">***                            MEINS      단위</font>
+<font color ="#0000FF">***                            APPROVAL   승인여부</font>
+<font color ="#0000FF">***                            APPROVER   결재자</font>
+<font color ="#0000FF">***                            REJREASON  반려사유</font>
+<font color ="#0000FF">***                            LOEKZ      삭제플래그</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">*  PERFORM NUMR.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">*  GS_MMT090-MBLNR = ZEA_MMT100-MBLNR.</font>
+<font color ="#0000FF">*  GS_MMT090-GJAHR = SY-DATUM(4).</font>
+<font color ="#0000FF">*  GS_MMT090-WERKS = GS_AUFK-WERKS.</font>
+<font color ="#0000FF">*  GS_MMT090-VGART = ' '.</font>
+<font color ="#0000FF">*  GS_MMT090-BUDAT = SY-DATUM.</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">***--------------------------------------------------------------------*</font>
+<font color ="#0000FF">*** 자재문서 아이템 생성</font>
+<font color ="#0000FF">***--------------------------------------------------------------------*</font>
+<font color ="#0000FF">*** MBLNR  자재문서 번호         AUFNR     생산오더 ID</font>
+<font color ="#0000FF">*** GJAHR  회계연도              ORDIDX    생산오더 Index</font>
+<font color ="#0000FF">*** MBGNO  자재문서 품목번호     MATNR     자재코드</font>
+<font color ="#0000FF">*** MATNR  자재코드              BOMID     BOM ID</font>
+<font color ="#0000FF">*** BWART  이동유형              WERKS     플랜트ID</font>
+<font color ="#0000FF">*** CHARG  배치 번호             EXPQTY    예상 생산수량</font>
+<font color ="#0000FF">*** PLANTFR  시작정보(플랜트)    SDATE     생산 시작일자</font>
+<font color ="#0000FF">*** PLANTTO  도착정보(플랜트)    EDATE     생산 종료일자</font>
+<font color ="#0000FF">*** LGORTFR  저장위치(시작)      ISPDATE   검수완료 일자</font>
+<font color ="#0000FF">*** LGORTTO  저장위치(도착)      REPQTY    임시 검수수량</font>
+<font color ="#0000FF">*** DMBTR  통화금액(KRW)         RQTY      생산완료 수량</font>
+<font color ="#0000FF">*** WAERS1 통화코드             UNIT      단위</font>
+<font color ="#0000FF">*** MENGE  수량                  LOEKZ     삭제플래그</font>
+<font color ="#0000FF">*** MEINS  단위</font>
+<font color ="#0000FF">*** GRUND  자재 이동사유</font>
+<font color ="#0000FF">*** VENCODE  [BP] 벤더코드</font>
+<font color ="#0000FF">*** CUSCODE [BP]고객코드</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">***   4월 1일에 100$ 수입해옴 환율 1000원</font>
+<font color ="#0000FF">***   4월 10일에 100$ 수입해옴 환율 1100원</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">***   KRW 표시 총 재고 가격은 210,000원</font>
+<font color ="#0000FF">***   USD 표시 총 재고 가격은 200$.</font>
+<font color ="#0000FF">**  REFRESH GT_MMT100.</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">*  LOOP AT GT_STPO INTO GS_STPO.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  CLEAR GS_STPO.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    CLEAR GS_MMT100.</font>
+<font color ="#0000FF">*    GS_MMT100-MBLNR   = GS_MMT090-MBLNR.</font>
+<font color ="#0000FF">*    GS_MMT100-GJAHR   = GS_MMT090-GJAHR.</font>
+<font color ="#0000FF">*    GS_MMT100-MBGNO   = SY-TABIX.</font>
+<font color ="#0000FF">*    GS_MMT100-MATNR   = GS_STPO-MATNR. " 원재료</font>
+<font color ="#0000FF">*    GS_MMT100-PONUM   = SPACE.</font>
+<font color ="#0000FF">*    GS_MMT100-AUFNR   = GS_AUFK-AUFNR.</font>
+<font color ="#0000FF">*    GS_MMT100-SBELNR   = SPACE.</font>
+<font color ="#0000FF">*    GS_MMT100-BWART   = '261'. " 생산승인되어 원자재공장-&gt;생산출고하는 유형</font>
+<font color ="#0000FF">*    GS_MMT100-PLANTFR = GS_AUFK-WERKS.</font>
+<font color ="#0000FF">*    GS_MMT100-PLANTTO = GS_AUFK-WERKS.</font>
+<font color ="#0000FF">*    GS_MMT100-LGORTFR = '10000'. " GS_AUFK-WERKS 의 원자재 저장위치 코드</font>
+<font color ="#0000FF">*    GS_MMT100-LGORTTO = '10000'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    GS_MMT100-MENGE   = GS_STPO-MENGE.</font>
+<font color ="#0000FF">*    GS_MMT100-MEINS   = GS_STPO-MEINS.</font>
+<font color ="#0000FF">***--------------------------------------------------------------------*</font>
+<font color ="#0000FF">*    GS_MMT100-DMBTR   = LV_STPRS * GS_STPO-MENGE.</font>
+<font color ="#0000FF">***--------------------------------------------------------------------*</font>
+<font color ="#0000FF">*    GS_MMT100-WAERS1  = TEXT-U01.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    GS_MMT100-GRUND   = | { GS_AUFK-WERKS } 생산승인되어 원자재공장-&gt;생산출고하는 유형 |.</font>
+<font color ="#0000FF">*    GS_MMT100-VENCODE = SPACE.</font>
+<font color ="#0000FF">*    GS_MMT100-CUSCODE = SPACE.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    APPEND GS_MMT090 TO GT_MMT090.</font>
+<font color ="#0000FF">*    APPEND GS_MMT100 TO GT_MMT100.</font>
+<font color ="#0000FF">*  ENDLOOP.</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">*  BREAK-POINT.</font>
+<font color ="#0000FF">***--------------------------------------------------------------------*</font>
+<font color ="#0000FF">*** DB 저장하는 과정</font>
+<font color ="#0000FF">***--------------------------------------------------------------------*</font>
+<font color ="#0000FF">***</font>
+<font color ="#0000FF">*  INSERT ZEA_MMT090 FROM GS_MMT090.</font>
+<font color ="#0000FF">*  INSERT ZEA_MMT100 FROM TABLE GT_MMT100.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    INSERT ZEA_MMT090 FROM TABLE GT_MMT090 ACCEPTING DUPLICATE KEYS.</font>
+<font color ="#0000FF">*    IF SY-SUBRC NE 0.</font>
+<font color ="#0000FF">*      ROLLBACK WORK.</font>
+<font color ="#0000FF">*    ENDIF.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*    INSERT ZEA_MMT100 FROM TABLE GT_MMT100 ACCEPTING DUPLICATE KEYS.</font>
+<font color ="#0000FF">*    IF SY-SUBRC NE 0.</font>
+<font color ="#0000FF">*      ROLLBACK WORK.</font>
+<font color ="#0000FF">*    ENDIF.</font>
+<font color ="#0000FF">*BREAK-POINT.</font>
+
+
+
+  CLEAR: GT_AUFK[], GT_PPT020[].
+
+  SELECT * INTO CORRESPONDING FIELDS OF TABLE @GT_AUFK
+           FROM ZEA_AUFK
+          WHERE AUFNR EQ @IV_AUFNR.
+  IF SY-SUBRC NE 0.
+  ELSE.
+
+    SELECT * INTO CORRESPONDING FIELDS OF TABLE @GT_PPT020
+             FROM ZEA_PPT020
+                  FOR ALL ENTRIES IN @GT_AUFK
+            WHERE AUFNR EQ @GT_AUFK-AUFNR.
+            " AND ORDIDX EQ @IV_ORDIDX.
+  ENDIF.
+
+  CLEAR: GT_MMT090[], GT_MMT100[].
+  CLEAR: ZEA_MMT090-MBLNR.
+
+  LOOP AT GT_AUFK INTO GS_AUFK.
+
+    PERFORM MAKE_MBLNR_HEADER_DATA_PP TABLES GT_MMT090
+                                   USING GS_AUFK
+                                   CHANGING ZEA_MMT090-MBLNR.
+
+    LOOP AT GT_PPT020 INTO GS_PPT020
+                      WHERE AUFNR EQ GS_AUFK-AUFNR.
+      PERFORM MAKE_MBLNR_ITEM_DATA_PP TABLES GT_MMT100
+                                             IT_ITEM  " 추가?
+                                   USING GS_PPT020
+                                         ZEA_MMT090-MBLNR.
+
+    ENDLOOP.
+
+  ENDLOOP.
+
+<font color ="#0000FF">* Save Data</font>
+  IF GT_MMT090[] IS NOT INITIAL.
+    INSERT ZEA_MMT090 FROM TABLE GT_MMT090 ACCEPTING DUPLICATE KEYS.
+    IF SY-SUBRC NE 0.
+      ROLLBACK WORK.
+    ENDIF.
+  ENDIF.
+
+
+  IF GT_MMT100[] IS NOT INITIAL.
+    INSERT ZEA_MMT100 FROM TABLE GT_MMT100 ACCEPTING DUPLICATE KEYS.
+    IF SY-SUBRC NE 0.
+      ROLLBACK WORK.
+    ENDIF.
+  ENDIF.
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*</font>
+  ENDFUNCTION.
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: Hard coded</font>
+<font color ="#0000FF">*   출고 수량이 잔여 수량보다 많습니다.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

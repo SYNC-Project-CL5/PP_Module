@@ -1,0 +1,96 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZEA_PP080</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZEA_PP080</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [PP] MRP 조회</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZALV_GRID_DISPLAY</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& [2024.04.26 / 단위 테스트 완료] - [PM] 김건우 : o</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT ZEA_PP080 MESSAGE-ID ZMSG_E23.
+
+include <a href ="zea_pp080_top.html">ZEA_PP080_TOP</a>.
+include <a href ="zea_pp080_scr.html">ZEA_PP080_SCR</a>.
+include <a href ="zea_pp080_cls.html">ZEA_PP080_CLS</a>.
+include <a href ="zea_pp080_pbo.html">ZEA_PP080_PBO</a>.
+include <a href ="zea_pp080_pai.html">ZEA_PP080_PAI</a>.
+include <a href ="zea_pp080_f01.html">ZEA_PP080_F01</a>.
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* INITIALIZATION</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+INITIALIZATION.
+  PERFORM INIT_DATA.
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* AT SELECTION SCREEN OUTPUT</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+AT SELECTION-SCREEN OUTPUT.
+  PERFORM MODIFY_SSCREEN.
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* AT SELECTION SCREEN</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* AT SELECTION-SCREEN ON BLOCK B01.</font>
+<font color ="#0000FF">* PERFORM CHECK_INPUT.</font>
+
+AT SELECTION-SCREEN.
+  PERFORM SSCR_USER_COMMAND.
+
+  PERFORM SELECT_DATA.
+  PERFORM MAKE_DISPLAY_DATA.
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* START-OF-SELECTION</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+START-OF-SELECTION.
+
+  PERFORM SELECT_DATA.
+  PERFORM MAKE_DISPLAY_DATA.
+  PERFORM DISPLAY_DATA.
+
+<font color ="#0000FF">*GUI Texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T0100 --&gt; [PP] MRP 조회 프로그램</font>
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* S01 Search</font>
+<font color ="#0000FF">* S02 생산계획월</font>
+<font color ="#0000FF">* T01 검색 조건</font>
+
+
+<font color ="#0000FF">*Selection texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* SO_MRPID D       .</font>
+<font color ="#0000FF">* SO_PDAT D       .</font>
+<font color ="#0000FF">* SO_PMON D       .</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: Hard coded</font>
+<font color ="#0000FF">*   컨테이너 생성에 실패했습니다.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZMSG_E23</font>
+<font color ="#0000FF">*000   & & & &</font>
+<font color ="#0000FF">*006   & 건의 데이터가 검색되었습니다.</font>
+<font color ="#0000FF">*013   해당 조건의 데이터가 존재하지 않습니다.</font>
+<font color ="#0000FF">*020   Custom Container 생성 중 오류가 발생했습니다.</font>
+<font color ="#0000FF">*021   ALV Grid 생성 중 오류가 발생했습니다.</font>
+<font color ="#0000FF">*022   Field Catalog 생성 및 변환 중 오류가 발생했습니다.</font>
+<font color ="#0000FF">*023   ALV Grid 에 데이터를 전달하는 중 오류가 발생했습니다.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

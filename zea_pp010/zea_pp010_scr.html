@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZEA_PP010_SCR</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZEA_PP010_SCR</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZALV_GRID_DISPLAY_SCR</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZALV_GRID_DISPLAY_SCR</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK B01 WITH FRAME TITLE TEXT-T01.</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK B01.</font>
+
+
+
+
+<font color ="#0000FF">* PARAMETERS PA_LAYO TYPE DISVARIANT.</font>
+<font color ="#0000FF">*EX--------------------------------------------------------------------*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF TABBED BLOCK TAB_BLOCK FOR 10 LINES.</font>
+<font color ="#0000FF">*SELECTION-SCREEN TAB (20) TAB1 USER-COMMAND COMM1 DEFAULT SCREEN 1100.</font>
+<font color ="#0000FF">*SELECTION-SCREEN TAB (20) TAB2 USER-COMMAND COMM2 DEFAULT SCREEN 1200.</font>
+<font color ="#0000FF">*SELECTION-SCREEN TAB (20) TAB3 USER-COMMAND COMM3 DEFAULT SCREEN 1300.</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK TAB_BLOCK.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF SCREEN 1100 AS SUBSCREEN.</font>
+<font color ="#0000FF">*SELECT-OPTIONS:</font>
+<font color ="#0000FF">*  SO_CAR  FOR GS_FLIGHT-CARRID MEMORY ID CAR,</font>
+<font color ="#0000FF">*  SO_CON  FOR GS_FLIGHT-CONNID.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN PUSHBUTTON /35(20) BUTTXT USER-COMMAND CLICK_DETAIL.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*" TEXT-T02: City about flight</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK CITY WITH FRAME TITLE TEXT-T02.</font>
+<font color ="#0000FF">*SELECT-OPTIONS:</font>
+<font color ="#0000FF">*  SO_CITYF FOR GS_FLIGHT-CITYFROM MODIF ID CTY,</font>
+<font color ="#0000FF">*  SO_CITYT FOR GS_FLIGHT-CITYTO   MODIF ID CTY.</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK CITY.</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF SCREEN 1100.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF SCREEN 1200 AS SUBSCREEN.</font>
+<font color ="#0000FF">*SELECT-OPTIONS:</font>
+<font color ="#0000FF">*  SO_DAY  FOR GS_FLIGHT-FLDATE NO-EXTENSION.</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF SCREEN 1200.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF SCREEN 1300 AS SUBSCREEN.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK CHECK.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*PARAMETERS:</font>
+<font color ="#0000FF">*  PA_RA1  RADIOBUTTON GROUP RAG1," USER-COMMAND MODE, " Read all flights</font>
+<font color ="#0000FF">*  PA_RA2  RADIOBUTTON GROUP RAG1,                   " Read only domestic flights</font>
+<font color ="#0000FF">*  PA_RA3  RADIOBUTTON GROUP RAG1 DEFAULT 'X'.       " Read only international flights</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*PARAMETERS:</font>
+<font color ="#0000FF">*  PA_CTRFR LIKE GS_FLIGHT-COUNTRYFR.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK CHECK.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF SCREEN 1300.</font>
+
+<font color ="#0000FF">*EX------------------------------------------------------------------*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK B01 WITH FRAME TITLE TEXT-T01.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECT-OPTIONS SO_DAY FOR SFLIGHT-FLDATE OBLIGATORY</font>
+<font color ="#0000FF">*                                         NO-EXTENSION.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN SKIP 1. " 1줄 건너뛰기</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK B02 WITH FRAME</font>
+<font color ="#0000FF">*                                    TITLE TEXT-T02</font>
+<font color ="#0000FF">*                                    NO INTERVALS.</font>
+<font color ="#0000FF">*PARAMETERS PA_CTRF  TYPE SPFLI-COUNTRYFR OBLIGATORY.</font>
+<font color ="#0000FF">*SELECT-OPTIONS SO_CITYF FOR SPFLI-CITYFROM NO INTERVALS.</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK B02.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK B03 WITH FRAME</font>
+<font color ="#0000FF">*                                    TITLE TEXT-T03</font>
+<font color ="#0000FF">*                                    NO INTERVALS.</font>
+<font color ="#0000FF">*PARAMETERS PA_CTRT  TYPE SPFLI-COUNTRYTO OBLIGATORY.</font>
+<font color ="#0000FF">*SELECT-OPTIONS SO_CITYT FOR SPFLI-CITYTO NO INTERVALS.</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK B03.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK B01.</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+
+<font color ="#0000FF">*EX------------------------------------------------------------------*</font>
+" TEXT-T01 : Execute Mode
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK B01 WITH FRAME TITLE TEXT-T01.</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF LINE.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*PARAMETERS PA_INS RADIOBUTTON GROUP RAG1.</font>
+<font color ="#0000FF">*" TEXT-L01: Insert Data</font>
+<font color ="#0000FF">*SELECTION-SCREEN COMMENT (15) TEXT-L01 FOR FIELD PA_INS.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*PARAMETERS PA_SEL RADIOBUTTON GROUP RAG1.</font>
+<font color ="#0000FF">*" TEXT-L02: Select Data</font>
+<font color ="#0000FF">*SELECTION-SCREEN COMMENT (15) TEXT-L02 FOR FIELD PA_SEL.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*PARAMETERS PA_DEL RADIOBUTTON GROUP RAG1.</font>
+<font color ="#0000FF">*" TEXT-L03: Delete All Data</font>
+<font color ="#0000FF">*SELECTION-SCREEN COMMENT (15) TEXT-L03 FOR FIELD PA_DEL.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF LINE.</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK B01.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*" TEXT-T02 : Selection Options</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK B02 WITH FRAME TITLE TEXT-T02.</font>
+<font color ="#0000FF">*SELECT-OPTIONS:</font>
+<font color ="#0000FF">*  SO_CAR FOR ZDETAIL_E00_REV-CARRID,</font>
+<font color ="#0000FF">*  SO_CON FOR ZDETAIL_E00_REV-CONNID,</font>
+<font color ="#0000FF">*  SO_DAT FOR ZDETAIL_E00_REV-FLDATE,</font>
+<font color ="#0000FF">*  SO_ODT FOR ZDETAIL_E00_REV-ORDER_DATE.</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK B02.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*" TEXT-T03 : Additional Options</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK B03 WITH FRAME TITLE TEXT-T03.</font>
+<font color ="#0000FF">*SELECT-OPTIONS:</font>
+<font color ="#0000FF">*  SO_CTRF FOR ZDETAIL_E00_REV-COUNTRYFR NO INTERVALS NO-EXTENSION,</font>
+<font color ="#0000FF">*  SO_CITF FOR ZDETAIL_E00_REV-CITYFROM  NO INTERVALS NO-EXTENSION,</font>
+<font color ="#0000FF">*  SO_CTRT FOR ZDETAIL_E00_REV-COUNTRYTO NO INTERVALS NO-EXTENSION,</font>
+<font color ="#0000FF">*  SO_CITT FOR ZDETAIL_E00_REV-CITYTO    NO INTERVALS NO-EXTENSION.</font>
+<font color ="#0000FF">*PARAMETERS</font>
+<font color ="#0000FF">*  PA_INCL AS CHECKBOX.</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK B03.</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+
+<font color ="#0000FF">*EX------------------------------------------------------------------*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK B01 WITH FRAME TITLE TEXT-T01.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  SELECT-OPTIONS: SO_CAR FOR ZFLIGHT_E23-CARRID,</font>
+<font color ="#0000FF">*                  SO_CON FOR ZFLIGHT_E23-CONNID,</font>
+<font color ="#0000FF">*                  SO_DAT FOR ZFLIGHT_E23-FLDATE NO-EXTENSION.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  SELECTION-SCREEN SKIP 1.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  PARAMETERS: P_MAX TYPE I.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK B01.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN SKIP 1.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN PUSHBUTTON /1(30) BUTTXT USER-COMMAND CLICK_DETAIL.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN BEGIN OF BLOCK B02 WITH FRAME TITLE TEXT-T02.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*  PARAMETERS : PA_RAD1 RADIOBUTTON GROUP RD1 MODIF ID MOD</font>
+<font color ="#0000FF">*                                             USER-COMMAND RG1,</font>
+<font color ="#0000FF">*               PA_RAD2 RADIOBUTTON GROUP RD1 MODIF ID MOD,</font>
+<font color ="#0000FF">*               PA_RAD3 RADIOBUTTON GROUP RD1 MODIF ID MOD,</font>
+<font color ="#0000FF">*               PA_RAD4 RADIOBUTTON GROUP RD1 MODIF ID MOD DEFAULT 'X'.</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">*SELECTION-SCREEN END OF BLOCK B02.</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

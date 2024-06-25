@@ -1,0 +1,39 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>LZEA_FI_PPTOP</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: LZEA_FI_PPTOP</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [FI] PP모듈 WE 지동함수</b></font>
+<hr>
+<pre width="100">
+FUNCTION-POOL ZEA_FI_PP.                    "MESSAGE-ID ..
+
+<font color ="#0000FF">* INCLUDE LZEA_FI_PPD...                     " Local class definition</font>
+<font color ="#0000FF">*"----------------------------------------------------------------------</font>
+<font color ="#0000FF">*                   Variant About Function Module</font>
+<font color ="#0000FF">*"----------------------------------------------------------------------</font>
+  TABLES: ZEA_BKPF, ZEA_BSEG,       " FI 헤더/ 아이템
+          ZEA_MMT010, ZEA_MMT020 .  " MM 자재/ 자재 Text
+
+  " FI 전표 헤더 테이블
+  DATA: GT_BKPF TYPE TABLE OF ZEA_BKPF,
+        GS_BKPF TYPE ZEA_BKPF.
+
+  " FI 전표 아이템 테이블
+  DATA: GT_BSEG TYPE TABLE OF ZEA_BSEG,
+        GS_BSEG TYPE ZEA_BSEG.
+
+
+<font color ="#0000FF">*-- Variant</font>
+<font color ="#0000FF">* --FI 전표번호 채번</font>
+  DATA: GV_BELNR_NUMBER TYPE ZEA_BKPF-BELNR.      " 전표번호(key)
+  DATA: GV_ITNUM TYPE N.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

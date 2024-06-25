@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>LZEA_MM_FGTOP</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: LZEA_MM_FGTOP</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [MM] PP 검수 함수</b></font>
+<hr>
+<pre width="100">
+FUNCTION-POOL ZEA_MM_FG.                    "MESSAGE-ID ..
+
+<font color ="#0000FF">* INCLUDE LZEA_MM_FGD...                     " Local class definition</font>
+
+TABLES: ZEA_AUFK, ZEA_PPT020, ZEA_MMT140, ZEA_MMT150, ZEA_MMT090,
+        ZEA_AFRU, ZEA_MMT100, ZEA_MMT010, ZEA_SDT110, ZEA_STPO,
+        ZEA_MMT070, ZEA_MMT190.
+
+DATA: GT_AUFK TYPE TABLE OF ZEA_AUFK,
+      GS_AUFK TYPE ZEA_AUFK.
+
+DATA: GT_PPT020 TYPE TABLE OF ZEA_PPT020,
+      GS_PPT020 TYPE ZEA_PPT020.
+
+  DATA: BEGIN OF GS_DATA,
+        AUFNR   TYPE ZEA_AFRU-AUFNR,
+        CHARG   TYPE ZEA_AFRU-CHARG,
+        MATNR   TYPE ZEA_AFRU-MATNR,
+        BOMID   TYPE ZEA_AFRU-BOMID,
+        EMPCODE TYPE ZEA_AFRU-EMPCODE,
+        WERKS   TYPE ZEA_MMT070-WERKS,
+        SCODE  TYPE ZEA_MMT070-SCODE,
+        TSDAT   TYPE ZEA_AFRU-TSDAT,
+        FNPD    TYPE ZEA_AFRU-FNPD,
+        MEINS   TYPE ZEA_AFRU-MEINS,
+      END OF GS_DATA.
+
+DATA GT_DATA LIKE TABLE OF GS_DATA.
+
+<font color ="#0000FF">* [SD]</font>
+DATA: GT_SDT060 TYPE TABLE OF ZEA_SDT060,
+      GS_SDT060 TYPE          ZEA_SDT060.
+DATA: GT_SDT110 TYPE TABLE OF ZEA_SDT110,
+      GS_SDT110 TYPE          ZEA_SDT110.
+
+<font color ="#0000FF">* [MM]</font>
+DATA: GT_MMT140 TYPE TABLE OF ZEA_MMT140,
+      GS_MMT140 TYPE          ZEA_MMT140.
+DATA: GT_MMT150 TYPE TABLE OF ZEA_MMT150,
+      GS_MMT150 TYPE          ZEA_MMT150.
+
+<font color ="#0000FF">* 자재문서</font>
+DATA : GT_MMT090 TYPE TABLE OF ZEA_MMT090 WITH HEADER LINE.
+DATA: GS_MMT090 LIKE LINE OF GT_MMT090.
+DATA : GT_MMT100 TYPE TABLE OF ZEA_MMT100 WITH HEADER LINE.
+
+DATA: GT_MMT190 TYPE TABLE OF ZEA_MMT190,
+      GS_MMT190 TYPE ZEA_MMT190.
+DATA: GT_MMT070 TYPE TABLE OF ZEA_MMT070,
+      GS_MMT070 TYPE ZEA_MMT070.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

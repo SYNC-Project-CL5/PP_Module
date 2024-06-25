@@ -1,0 +1,67 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZEA_PP060_PBO</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZEA_PP060_PBO</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include ZALV_GRID_DISPLAY_PBO</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          ZALV_GRID_DISPLAY_PBO</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module STATUS_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE STATUS_0100 OUTPUT.
+  SET PF-STATUS 'S0100'.
+  SET TITLEBAR 'T0100'.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module CLEAR_OK_CODE OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE CLEAR_OK_CODE OUTPUT.
+  CLEAR OK_CODE.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module INIT_ALV_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE INIT_ALV_0100 OUTPUT.
+
+  " CCON : 생산 계획
+  IF GO_CONTAINER IS INITIAL.
+    PERFORM CREATE_OBJECT_0100.
+    PERFORM SET_ALV_FIELDCAT_0100.
+    PERFORM SET_ALV_LAYOUT_0100.
+    PERFORM SET_ALV_EVENT_0100.
+    PERFORM DISPLAY_ALV_0100.
+  ELSE.
+    PERFORM REFRESH_ALV_0100.
+  ENDIF.
+
+  " CCON2 : 판매계획
+  IF GO_CONTAINER_2 IS INITIAL.
+    PERFORM CREATE_OBJECT2_0100.
+    PERFORM SET_ALV_FIELDCAT2_0100.
+    PERFORM SET_ALV_LAYOUT2_0100.
+    PERFORM SET_ALV_EVENT2_0100.
+    PERFORM DISPLAY_ALV2_0100.
+  ELSE.
+    PERFORM REFRESH_ALV2_0100.
+  ENDIF.
+
+ENDMODULE.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

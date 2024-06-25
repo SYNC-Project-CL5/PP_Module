@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZEA_PP110</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZEA_PP110</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [PP] 생산계획 생성 및 조회</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report YE00_EX007</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& [PP] 생산계획 생성 및 조회</font>
+<font color ="#0000FF">*& [2024.05.13 / 단위 테스트 완료] - [PM] 김건우 : o</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT ZEA_PP110 MESSAGE-ID ZEA_MSG.
+
+include <a href ="zea_pp110top.html">ZEA_PP110TOP</a>.
+
+include <a href ="zea_pp110cls.html">ZEA_PP110CLS</a>.
+
+include <a href ="zea_pp110scr.html">ZEA_PP110SCR</a>.
+
+include <a href ="zea_pp110pbo.html">ZEA_PP110PBO</a>.
+
+include <a href ="zea_pp110pai.html">ZEA_PP110PAI</a>.
+
+include <a href ="zea_pp110f01.html">ZEA_PP110F01</a>. " 판매계획과 관련된 서브루틴 집합
+include <a href ="zea_pp110f02.html">ZEA_PP110F02</a>. " 생산계획과 관련된 서브루틴 집합
+
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* INITIALIZATION</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+INITIALIZATION.
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* AT SELECTION SCREEN OUTPUT</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+AT SELECTION-SCREEN OUTPUT.
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* AT SELECTION SCREEN</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+AT SELECTION-SCREEN.
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* START-OF-SELECTION</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+START-OF-SELECTION.
+
+  PERFORM SELECT_DATA.
+  PERFORM DISPLAY_DATA.
+  CALL SCREEN 0100.
+
+<font color ="#0000FF">*GUI Texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* 0100 --&gt; [PP] 생산계획 생성 및 조회</font>
+<font color ="#0000FF">* 0110 --&gt; &년도 생산계획 생성</font>
+
+<font color ="#0000FF">*Text elements</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* E01 출력할 ALV가 없습니다.</font>
+<font color ="#0000FF">* L01   생산계획 생성</font>
+<font color ="#0000FF">* T01 판매계획 세부조회</font>
+<font color ="#0000FF">* T02 생산계획 세부조회</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: ZEA_MSG</font>
+<font color ="#0000FF">*000   & & & &</font>
+<font color ="#0000FF">*020   Custom Container 생성 중 오류가 발생했습니다.</font>
+<font color ="#0000FF">*021   ALV Grid 생성 중 오류가 발생했습니다.</font>
+<font color ="#0000FF">*025   TREE NODE 생성 중 오류가 발생했습니다.</font>
+<font color ="#0000FF">*076   생산계획은 판매년도 또는 1000번 회사코드에서만 수립할 수 있습니다.</font>
+<font color ="#0000FF">*078   생산계획 &가 생성되었습니다. INDEX는 &입니다.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

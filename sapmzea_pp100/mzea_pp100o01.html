@@ -1,0 +1,85 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>MZEA_PP100O01</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: MZEA_PP100O01</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  Include MZEA_PP100O01</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Include          MZEA_PP100O01</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module STATUS_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE STATUS_0100 OUTPUT.
+  SET PF-STATUS '0100'.
+  SET TITLEBAR '0100'.
+
+  " SY-UNAME 현재 사용자
+  " SY-DATUM 현재 날짜
+  " SY-UZEIT 현재 시간
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module CLEAR_OK_CODE OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE CLEAR_OK_CODE OUTPUT.
+  CLEAR OK_CODE.
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module INIT_ALV_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE INIT_ALV_0100 OUTPUT.
+
+
+<font color ="#0000FF">*  PERFORM DISPLAY_DATA.</font>
+
+  IF GO_CONTAINER IS INITIAL.
+    PERFORM SELECT_DATA.
+    PERFORM MAKE_DISPLAY_DATA.
+
+    PERFORM CREATE_OBJECT_0100.
+    PERFORM SET_ALV_FIELDCAT_0100.
+    PERFORM SET_ALV_LIST_0100.
+    PERFORM SET_ALV_LAYOUT_0100.
+    PERFORM SET_ALV_EVENT_0100.
+    PERFORM DISPLAY_ALV_0100.
+  ELSE.
+    PERFORM MODIFY_DISPLAY_DATA.
+    PERFORM REFRESH_ALV_0100.
+  ENDIF.
+
+ENDMODULE.
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Module FILL_DYNP_0100 OUTPUT</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*&</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+MODULE FILL_DYNP_0100 OUTPUT.
+
+  IF ZEA_T001W-PNAME1 IS INITIAL.
+    CLEAR ZEA_T001W-WERKS.
+  ELSE.
+    SELECT SINGLE WERKS
+      FROM ZEA_T001W
+      INTO ZEA_T001W-WERKS
+     WHERE PNAME1 EQ ZEA_T001W-PNAME1.
+  ENDIF.
+
+ENDMODULE.
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

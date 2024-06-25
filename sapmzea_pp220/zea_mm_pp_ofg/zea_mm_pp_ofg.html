@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZEA_MM_PP_OFG</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for function: ZEA_MM_PP_OFG</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [MM] PP 검수 함수</b></font>
+<hr>
+<pre width="100">
+FUNCTION ZEA_MM_PP_OFG.
+<font color ="#0000FF">*"----------------------------------------------------------------------</font>
+<font color ="#0000FF">*"*"Local Interface:</font>
+<font color ="#0000FF">*"  IMPORTING</font>
+<font color ="#0000FF">*"     REFERENCE(IV_AUFNR) TYPE  ZEA_AFRU-AUFNR</font>
+<font color ="#0000FF">*"----------------------------------------------------------------------</font>
+
+<font color ="#0000FF">*       <a href ="global-zea_mm_pp_ofg.html">Global data declarations</a></font>
+
+
+
+
+  " 7번 넘버레인지 자재문서 번호
+  DATA: GT_AFRU TYPE TABLE OF ZEA_AFRU,
+        GS_AFRU LIKE LINE OF GT_AFRU.
+
+<font color ="#0000FF">* ZEA_MMT090 따라서 만든 itab wa 선언</font>
+  DATA : GT_MMT090 TYPE TABLE OF ZEA_MMT090,
+         GS_MMT090 TYPE ZEA_MMT090.
+<font color ="#0000FF">* ZEA_MMT100 따라서 만든 itab wa를 선언</font>
+  DATA : GT_MMT100 TYPE TABLE OF ZEA_MMT100,
+         GS_MMT100 LIKE LINE OF GT_MMT100.
+
+
+
+  CLEAR: GS_AUFK, GS_PPT020, GS_AFRU.
+  REFRESH: GT_AUFK, GT_PPT020, GT_AFRU.
+
+
+<font color ="#0000FF">*  DATA: GT_STPO TYPE TABLE OF ZEA_STPO,</font>
+<font color ="#0000FF">*        GS_STPO LIKE LINE OF GT_STPO.</font>
+
+  DATA: GT_MMT070 TYPE TABLE OF ZEA_MMT070,
+        GS_MMT070 LIKE LINE OF GT_MMT070.
+
+  SELECT *
+  FROM ZEA_MMT070  AS A
+  JOIN ZEA_AFRU AS B
+    ON B~CHARG EQ A~CHARG  "생산실적
+   AND B~MATNR EQ A~MATNR
+  INTO CORRESPONDING FIELDS OF TABLE @GT_DATA
+  WHERE AUFNR EQ @IV_AUFNR.
+
+  READ TABLE GT_DATA INTO GS_DATA INDEX 1.
+
+<font color ="#0000FF">*SELECT *</font>
+<font color ="#0000FF">*  FROM ZEA_AFRU</font>
+<font color ="#0000FF">*  INTO CORRESPONDING FIELDS OF TABLE @GT_AFRU</font>
+<font color ="#0000FF">*  WHERE AUFNR EQ @IV_AUFNR.</font>
+
+  SELECT SINGLE *
+    FROM ZEA_AUFK "생산오더
+    INTO CORRESPONDING FIELDS OF @GS_AUFK
+    WHERE AUFNR EQ @IV_AUFNR.
+
+  SELECT *
+    FROM ZEA_PPT020 "생산오더 아이템
+    INTO CORRESPONDING FIELDS OF TABLE @GT_PPT020
+    WHERE AUFNR EQ @IV_AUFNR.
+
+  SELECT SINGLE STPRS
+    FROM ZEA_MMT010
+    INTO @DATA(LV_STPRS)
+    WHERE MATNR EQ @GS_DATA-MATNR.
+
+<font color ="#0000FF">*  SELECT *</font>
+<font color ="#0000FF">*    FROM ZEA_MMT070</font>
+<font color ="#0000FF">*    INTO CORRESPONDING FIELDS OF TABLE GT_MMT070.</font>
+
+
+
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* 자재문서 헤더 생성</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* MBLNR	자재문서 번호 KEY    AUFNR      생산오더 ID KEY</font>
+<font color ="#0000FF">* GJAHR	회계연도             WERKS      플랜트ID</font>
+<font color ="#0000FF">* WERKS	플랜트ID             PLANID     생산계획 ID</font>
+<font color ="#0000FF">* VGART	트랜잭션 유형        MATNR      자재코드</font>
+<font color ="#0000FF">* BUDAT	전기일자             TOT_QTY    총 오더수량</font>
+<font color ="#0000FF">*                            MEINS      단위</font>
+<font color ="#0000FF">*                            APPROVAL   승인여부</font>
+<font color ="#0000FF">*                            APPROVER   결재자</font>
+<font color ="#0000FF">*                            REJREASON  반려사유</font>
+<font color ="#0000FF">*                            LOEKZ      삭제플래그</font>
+
+  PERFORM NUMR.
+
+  GS_MMT090-MBLNR = ZEA_MMT100-MBLNR.
+  GS_MMT090-GJAHR = GS_DATA-TSDAT(4).
+  GS_MMT090-WERKS = GS_DATA-WERKS.
+  GS_MMT090-VGART = ' '.
+  GS_MMT090-BUDAT = GS_DATA-TSDAT.
+  GS_MMT090-ERNAM = SY-UNAME.
+  GS_MMT090-ERDAT = SY-DATUM.
+  GS_MMT090-ERZET = SY-UZEIT.
+
+  INSERT ZEA_MMT090 FROM GS_MMT090.
+
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* 자재문서 아이템 생성</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* MBLNR	자재문서 번호         AUFNR     생산오더 ID</font>
+<font color ="#0000FF">* GJAHR	회계연도              ORDIDX    생산오더 Index</font>
+<font color ="#0000FF">* MBGNO	자재문서 품목번호     MATNR     자재코드</font>
+<font color ="#0000FF">* MATNR	자재코드              BOMID     BOM ID</font>
+<font color ="#0000FF">* BWART	이동유형              WERKS     플랜트ID</font>
+<font color ="#0000FF">* CHARG	배치 번호             EXPQTY    예상 생산수량</font>
+<font color ="#0000FF">* PLANTFR	시작정보(플랜트)    SDATE     생산 시작일자</font>
+<font color ="#0000FF">* PLANTTO	도착정보(플랜트)    EDATE     생산 종료일자</font>
+<font color ="#0000FF">* LGORTFR	저장위치(시작)      ISPDATE   검수완료 일자</font>
+<font color ="#0000FF">* LGORTTO	저장위치(도착)      REPQTY    임시 검수수량</font>
+<font color ="#0000FF">* DMBTR	통화금액(KRW)         RQTY      생산완료 수량</font>
+<font color ="#0000FF">* WAERS1 통화코드             UNIT      단위</font>
+<font color ="#0000FF">* MENGE	수량                  LOEKZ     삭제플래그</font>
+<font color ="#0000FF">* MEINS	단위</font>
+<font color ="#0000FF">* GRUND	자재 이동사유</font>
+<font color ="#0000FF">* VENCODE	[BP] 벤더코드</font>
+<font color ="#0000FF">* CUSCODE [BP]고객코드</font>
+
+  REFRESH GT_MMT100.
+
+  LOOP AT GT_DATA INTO GS_DATA.
+
+
+    GS_MMT100-MBLNR = GS_MMT090-MBLNR.
+    GS_MMT100-GJAHR = GS_DATA-TSDAT.
+    GS_MMT100-MBGNO = SY-TABIX.
+    GS_MMT100-MATNR = GS_DATA-MATNR.
+    GS_MMT100-PONUM   = SPACE.
+    GS_MMT100-AUFNR   = GS_AUFK-AUFNR.
+    GS_MMT100-SBELNR   = SPACE.
+    GS_MMT100-BWART = '131'. " 검수 완료된 완제품 입고
+    GS_MMT100-CHARG = GS_DATA-CHARG.
+    GS_MMT100-PLANTFR = GS_DATA-WERKS.
+    GS_MMT100-PLANTTO = GS_DATA-WERKS.
+    GS_MMT100-LGORTFR = GS_DATA-SCODE. " GS_AUFK-WERKS 의 원자재 저장위치 코드
+    GS_MMT100-LGORTTO = GS_DATA-SCODE.
+
+    GS_MMT100-MENGE   = GS_DATA-FNPD.
+    GS_MMT100-MEINS   = 'PKG'.
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+    GS_MMT100-DMBTR   = LV_STPRS * GS_DATA-FNPD * 100.
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+    GS_MMT100-WAERS1  = 'KRW'.
+
+    GS_MMT100-GRUND   = | { GS_DATA-WERKS } 검수 완료된 완제품 입고 유형|.
+    GS_MMT100-VENCODE = '1000'.
+    GS_MMT100-CUSCODE = SPACE.
+    GS_MMT100-ERNAM = SY-UNAME.
+    GS_MMT100-ERDAT = SY-DATUM.
+    GS_MMT100-ERZET = SY-UZEIT.
+<font color ="#0000FF">*    APPEND GS_MMT090 TO GT_MMT090.</font>
+    APPEND GS_MMT100 TO GT_MMT100.
+
+  ENDLOOP.
+<font color ="#0000FF">*  BREAK-POINT.</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+<font color ="#0000FF">* DB 저장하는 과정</font>
+<font color ="#0000FF">*--------------------------------------------------------------------*</font>
+
+
+  INSERT ZEA_MMT100 FROM TABLE GT_MMT100.
+
+  IF SY-SUBRC EQ 0.
+    COMMIT WORK.
+    "메세지
+  ELSE.
+    ROLLBACK WORK.
+    "메세지
+  ENDIF.
+
+
+
+
+
+
+
+ENDFUNCTION.
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: Hard coded</font>
+<font color ="#0000FF">*   출고 수량이 잔여 수량보다 많습니다.</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>

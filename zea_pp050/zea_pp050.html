@@ -1,0 +1,69 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>ZEA_PP050</title>
+</head>
+<body bgcolor="#FFFFE0">
+<font size="3" face = "Arial" color="#000000"><b>Code listing for: ZEA_PP050</b></font>
+<br>
+<font size="3" face = "Arial" color="#000000"><b>Description:  [PP] MPS 조회</b></font>
+<hr>
+<pre width="100">
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& Report ZEA_TR_TEM2</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+<font color ="#0000FF">*& [2024.04.18 / 단위 테스트 완료] - [PM] 김건우 : o</font>
+<font color ="#0000FF">*&---------------------------------------------------------------------*</font>
+REPORT ZEA_PP050 MESSAGE-ID OO.
+
+include <a href ="zea_pp050_top.html">ZEA_PP050_TOP</a>. " 전역변수 선언
+
+include <a href ="zea_pp050_scr.html">ZEA_PP050_SCR</a>. " Selection Screen 구성
+
+include <a href ="zea_pp050_cls.html">ZEA_PP050_CLS</a>. " Local Class 정의구현
+
+include <a href ="zea_pp050_pbo.html">ZEA_PP050_PBO</a>. " Screen 출력 전 Logic 처리 / PBO
+
+include <a href ="zea_pp050_pai.html">ZEA_PP050_PAI</a>. " Screen 출력 후 사용자에 의한 명령 처리
+
+include <a href ="zea_pp050_f01.html">ZEA_PP050_F01</a>. " Form Subroutines 모음
+
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* INITIALIZATION</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+INITIALIZATION.
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* AT SELECTION SCREEN OUTPUT</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+AT SELECTION-SCREEN OUTPUT.
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* AT SELECTION SCREEN</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+AT SELECTION-SCREEN.
+
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+<font color ="#0000FF">* START-OF-SELECTION</font>
+<font color ="#0000FF">*----------------------------------------------------------------------*</font>
+START-OF-SELECTION.
+  PERFORM GET_DATA.
+  PERFORM DISPLAY_DATA.
+
+<font color ="#0000FF">*GUI Texts</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">* T0100 --&gt; [PP] 생산계획(MPS) 조회</font>
+
+
+<font color ="#0000FF">*Messages</font>
+<font color ="#0000FF">*----------------------------------------------------------</font>
+<font color ="#0000FF">*</font>
+<font color ="#0000FF">* Message class: OO</font>
+<font color ="#0000FF">*000   & & & &</font>
+</pre>
+<hr>
+<font size="2" face = "Sans Serif">Extracted by Direct Download Enterprise version 1.3.1 - E.G.Mellodew. 1998-2005 UK. Sap Release 754
+</font>
+</body>
+</html>
